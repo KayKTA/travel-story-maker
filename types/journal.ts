@@ -45,22 +45,31 @@ export type ContentSource = 'typed' | 'audio_transcription';
 export type JournalMood =
     | 'excited'
     | 'happy'
-    | 'peaceful'
     | 'tired'
     | 'frustrated'
     | 'sad'
     | 'adventurous'
-    | 'inspired';
+    | 'inspired'
+    | 'chill'
+    | 'mixed'
+    | 'neutral'
+    | 'in_love'
+    | 'underwhelmed';
 
 export const JOURNAL_MOODS: { value: JournalMood; label: string; emoji: string }[] = [
+    // moods d’origine
     { value: 'excited', label: 'Excité(e)', emoji: '🎉' },
     { value: 'happy', label: 'Heureux(se)', emoji: '😊' },
-    { value: 'peaceful', label: 'Apaisé(e)', emoji: '😌' },
     { value: 'tired', label: 'Fatigué(e)', emoji: '😴' },
     { value: 'frustrated', label: 'Frustré(e)', emoji: '😤' },
     { value: 'sad', label: 'Triste', emoji: '😢' },
     { value: 'adventurous', label: 'Aventurier(ère)', emoji: '🏔️' },
     { value: 'inspired', label: 'Inspiré(e)', emoji: '✨' },
+    { value: 'chill', label: 'Chill', emoji: '🏖️' },
+    { value: 'mixed', label: 'Mitigé(e)', emoji: '😐' },
+    { value: 'neutral', label: 'Neutre', emoji: '😶' },
+    { value: 'in_love', label: 'Amoureux(se) du lieu', emoji: '❤️' },
+    { value: 'underwhelmed', label: 'Déçu(e)', emoji: '😕' },
 ];
 
 export interface TranscriptionRequest {

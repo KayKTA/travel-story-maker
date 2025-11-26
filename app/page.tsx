@@ -8,89 +8,69 @@ import {
     CardContent,
     CardActionArea,
     Skeleton,
+    Button,
 } from '@mui/material';
 import {
     Luggage as LuggageIcon,
     Book as BookIcon,
-    Receipt as ReceiptIcon,
-    AutoAwesome as AutoAwesomeIcon,
+    PhotoCamera as PhotoIcon,
     Map as MapIcon,
-    TrendingUp as TrendingUpIcon,
+    Add as AddIcon,
 } from '@mui/icons-material';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { formatDate } from '@/lib/utils/formatters';
 
-interface QuickActionCard {
-    title: string;
-    description: string;
-    href: string;
-    icon: React.ReactNode;
-    color: string;
+async function getRecentTrips() {
+    const supabase = await createClient();
+
+    const { data: trips } = await supabase
+        .from('trips')
+        .select('*')
+        .order('start_date', { ascending: false })
+        .limit(4);
+
+    // Get stats for each trip
+    const tripsWithStats = await Promise.all(
+        (trips || []).map(async (trip) => {
+            const { count: entriesCount } = await supabase
+                .from('journal_entries')
+                .select('*', { count: 'exact', head: true })
+                .eq('trip_id', trip.id);
+
+            const { count: photosCount } = await supabase
+                .from('media_assets')
+                .select('*', { count: 'exact', head: true })
+                .eq('trip_id', trip.id)
+                .eq('media_type', 'photo');
+
+            return {
+                ...trip,
+                entries_count: entriesCount || 0,
+                photos_count: photosCount || 0,
+            };
+        })
+    );
+
+    return tripsWithStats;
 }
-
-const QUICK_ACTIONS: QuickActionCard[] = [
-    {
-        title: 'Mes Voyages',
-        description: 'Voir et gérer tous vos voyages',
-        href: '/trips',
-        icon: <LuggageIcon sx={{ fontSize: 32 }} />,
-        color: '#0F766E',
-    },
-    {
-        title: 'Journal',
-        description: 'Écrire dans votre journal de voyage',
-        href: '/journal',
-        icon: <BookIcon sx={{ fontSize: 32 }} />,
-        color: '#3B82F6',
-    },
-    {
-        title: 'Dépenses',
-        description: 'Suivre vos dépenses de voyage',
-        href: '/expenses',
-        icon: <ReceiptIcon sx={{ fontSize: 32 }} />,
-        color: '#F59E0B',
-    },
-    {
-        title: 'Stories',
-        description: 'Créer des stories avec l\'IA',
-        href: '/stories',
-        icon: <AutoAwesomeIcon sx={{ fontSize: 32 }} />,
-        color: '#8B5CF6',
-    },
-    {
-        title: 'Carte',
-        description: 'Explorer vos voyages sur la carte',
-        href: '/map',
-        icon: <MapIcon sx={{ fontSize: 32 }} />,
-        color: '#10B981',
-    },
-];
 
 async function getDashboardStats() {
     const supabase = await createClient();
 
-    // Get trips count
     const { count: tripsCount } = await supabase
         .from('trips')
         .select('*', { count: 'exact', head: true });
 
-    // Get journal entries count
     const { count: journalCount } = await supabase
         .from('journal_entries')
         .select('*', { count: 'exact', head: true });
 
-    // Get media count
-    const { count: mediaCount } = await supabase
+    const { count: photosCount } = await supabase
         .from('media_assets')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .eq('media_type', 'photo');
 
-    // Get total expenses
-    const { data: expensesData } = await supabase
-        .from('expenses')
-        .select('amount');
-
-    const totalExpenses = expensesData?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
-
-    // Get countries visited
     const { data: countriesData } = await supabase
         .from('trips')
         .select('country');
@@ -100,52 +80,28 @@ async function getDashboardStats() {
     return {
         trips: tripsCount || 0,
         journal_entries: journalCount || 0,
-        media: mediaCount || 0,
-        total_expenses: totalExpenses,
+        photos: photosCount || 0,
         countries: countriesSet.size,
     };
 }
 
-function StatCard({
-    label,
-    value,
-    icon,
-}: {
-    label: string;
-    value: string | number;
-    icon: React.ReactNode;
-}) {
+function StatBadge({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
     return (
-        <Card sx={{ height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                <Box
-                    sx={{
-                        display: 'inline-flex',
-                        p: 1.5,
-                        borderRadius: 2,
-                        bgcolor: 'primary.main',
-                        color: 'white',
-                        mb: 1.5,
-                    }}
-                >
-                    {icon}
-                </Box>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                    {value}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    {label}
-                </Typography>
-            </CardContent>
-        </Card>
+        <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.5 }}>
+                {icon}
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>{value}</Typography>
+            </Box>
+            <Typography variant="caption" sx={{ opacity: 0.9 }}>{label}</Typography>
+        </Box>
     );
 }
 
-function StatsLoading() {
+function TripsLoading() {
     return (
         <Grid container spacing={2}>
-            {[1, 2, 3, 4, 5].map((i) => (
-                <Grid key={i} size={{ xs: 6, sm: 4, md: 2.4 }}>
+            {[1, 2, 3, 4].map((i) => (
+                <Grid key={i} size={{ xs: 12, sm: 6 }}>
                     <Skeleton variant="rounded" height={140} />
                 </Grid>
             ))}
@@ -153,135 +109,189 @@ function StatsLoading() {
     );
 }
 
-async function DashboardStats() {
-    const stats = await getDashboardStats();
+async function RecentTrips() {
+    const trips = await getRecentTrips();
+
+    if (trips.length === 0) {
+        return (
+            <Card sx={{ textAlign: 'center', py: 6, bgcolor: 'grey.50' }}>
+                <CardContent>
+                    <LuggageIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                        Aucun voyage pour le moment
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                        Commencez par créer votre premier voyage !
+                    </Typography>
+                    <Button
+                        component={Link}
+                        href="/trips?new=true"
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                    >
+                        Créer mon premier voyage
+                    </Button>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Grid container spacing={2}>
-            <Grid size={{ xs: 6, sm: 4, md: 2.4 }}>
-                <StatCard
-                    label="Voyages"
-                    value={stats.trips}
-                    icon={<LuggageIcon />}
-                />
-            </Grid>
-            <Grid size={{ xs: 6, sm: 4, md: 2.4 }}>
-                <StatCard
-                    label="Pays visités"
-                    value={stats.countries}
-                    icon={<MapIcon />}
-                />
-            </Grid>
-            <Grid size={{ xs: 6, sm: 4, md: 2.4 }}>
-                <StatCard
-                    label="Entrées journal"
-                    value={stats.journal_entries}
-                    icon={<BookIcon />}
-                />
-            </Grid>
-            <Grid size={{ xs: 6, sm: 4, md: 2.4 }}>
-                <StatCard
-                    label="Photos & Vidéos"
-                    value={stats.media}
-                    icon={<TrendingUpIcon />}
-                />
-            </Grid>
-            <Grid size={{ xs: 6, sm: 4, md: 2.4 }}>
-                <StatCard
-                    label="Total dépenses"
-                    value={`${stats.total_expenses.toLocaleString('fr-FR')} €`}
-                    icon={<ReceiptIcon />}
-                />
-            </Grid>
+            {trips.map((trip) => (
+                <Grid key={trip.id} size={{ xs: 12, sm: 6 }}>
+                    <Card
+                        sx={{
+                            height: '100%',
+                            transition: 'transform 0.2s',
+                            '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
+                        }}
+                    >
+                        <CardActionArea component={Link} href={`/trips/${trip.id}`} sx={{ height: '100%' }}>
+                            <CardContent sx={{ p: 2.5 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                                    {trip.country}
+                                </Typography>
+                                {trip.city && (
+                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                        {trip.city}
+                                    </Typography>
+                                )}
+                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                                    {formatDate(trip.start_date)}
+                                    {trip.end_date && ` → ${formatDate(trip.end_date)}`}
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <BookIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                        <Typography variant="body2" color="text.secondary">
+                                            {trip.entries_count} entrées
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <PhotoIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                        <Typography variant="body2" color="text.secondary">
+                                            {trip.photos_count} photos
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </CardActionArea>
+                    </Card>
+                </Grid>
+            ))}
         </Grid>
+    );
+}
+
+async function DashboardHeader() {
+    const stats = await getDashboardStats();
+
+    return (
+        <Box
+            sx={{
+                background: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)',
+                color: 'white',
+                py: { xs: 4, md: 5 },
+                px: { xs: 2, sm: 3, md: 4 },
+            }}
+        >
+            <Container maxWidth="lg">
+                <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 0.5 }}>
+                    Mon Journal de Voyage ✈️
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.9, mb: 3 }}>
+                    Documentez vos aventures, jour après jour
+                </Typography>
+
+                <Box sx={{ display: 'flex', gap: { xs: 3, sm: 5 }, flexWrap: 'wrap' }}>
+                    <StatBadge icon={<LuggageIcon sx={{ fontSize: 20 }} />} value={stats.trips} label="voyages" />
+                    <StatBadge icon={<MapIcon sx={{ fontSize: 20 }} />} value={stats.countries} label="pays" />
+                    <StatBadge icon={<BookIcon sx={{ fontSize: 20 }} />} value={stats.journal_entries} label="entrées" />
+                    <StatBadge icon={<PhotoIcon sx={{ fontSize: 20 }} />} value={stats.photos} label="photos" />
+                </Box>
+            </Container>
+        </Box>
     );
 }
 
 export default function HomePage() {
     return (
-        <Box sx={{ minHeight: '100vh' }}>
-            {/* Hero Section */}
-            <Box
-                sx={{
-                    background: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)',
-                    color: 'white',
-                    py: { xs: 4, md: 6 },
-                    px: { xs: 2, sm: 3, md: 4 },
-                }}
+        <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
+            <Suspense
+                fallback={
+                    <Box sx={{ background: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)', py: 5, px: 3 }}>
+                        <Container maxWidth="lg">
+                            <Skeleton variant="text" width={300} height={40} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+                            <Skeleton variant="text" width={250} height={24} sx={{ bgcolor: 'rgba(255,255,255,0.2)', mb: 3 }} />
+                            <Box sx={{ display: 'flex', gap: 5 }}>
+                                {[1, 2, 3, 4].map((i) => (
+                                    <Skeleton key={i} variant="rounded" width={60} height={50} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+                                ))}
+                            </Box>
+                        </Container>
+                    </Box>
+                }
             >
-                <Container maxWidth="lg">
-                    <Typography
-                        variant="h3"
-                        component="h1"
-                        sx={{ fontWeight: 700, mb: 1 }}
-                    >
-                        Travel Story Maker ✈️
-                    </Typography>
-                    <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400 }}>
-                        Capturez vos aventures, créez des souvenirs inoubliables
-                    </Typography>
-                </Container>
-            </Box>
+                <DashboardHeader />
+            </Suspense>
 
-            {/* Main Content */}
             <Container maxWidth="lg" sx={{ py: 4 }}>
-                {/* Stats Section */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-                        Vue d'ensemble
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                        Mes Voyages
                     </Typography>
-                    <Suspense fallback={<StatsLoading />}>
-                        <DashboardStats />
-                    </Suspense>
+                    <Button
+                        component={Link}
+                        href="/trips"
+                        variant="text"
+                        size="small"
+                    >
+                        Voir tout
+                    </Button>
                 </Box>
 
-                {/* Quick Actions */}
-                <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-                        Accès rapide
+                <Suspense fallback={<TripsLoading />}>
+                    <RecentTrips />
+                </Suspense>
+
+                {/* How it works */}
+                <Box sx={{ mt: 5 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        Comment ça marche ?
                     </Typography>
                     <Grid container spacing={2}>
-                        {QUICK_ACTIONS.map((action) => (
-                            <Grid key={action.href} size={{ xs: 12, sm: 6, md: 4 }}>
-                                <Card
-                                    sx={{
-                                        height: '100%',
-                                        transition: 'transform 0.2s, box-shadow 0.2s',
-                                        '&:hover': {
-                                            transform: 'translateY(-4px)',
-                                            boxShadow: 4,
-                                        },
-                                    }}
-                                >
-                                    <CardActionArea
-                                        // component={Link}
-                                        href={action.href}
-                                        sx={{ height: '100%' }}
-                                    >
-                                        <CardContent sx={{ p: 3 }}>
-                                            <Box
-                                                sx={{
-                                                    display: 'inline-flex',
-                                                    p: 1.5,
-                                                    borderRadius: 2,
-                                                    bgcolor: `${action.color}15`,
-                                                    color: action.color,
-                                                    mb: 2,
-                                                }}
-                                            >
-                                                {action.icon}
-                                            </Box>
-                                            <Typography
-                                                variant="h6"
-                                                sx={{ fontWeight: 600, mb: 0.5 }}
-                                            >
-                                                {action.title}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {action.description}
-                                            </Typography>
-                                        </CardContent>
-                                    </CardActionArea>
+                        {[
+                            { step: '1', title: 'Créez un voyage', desc: 'Ajoutez un nouveau voyage avec pays, dates...' },
+                            { step: '2', title: 'Ajoutez des entrées', desc: 'Documentez chaque jour avec photos et texte' },
+                            { step: '3', title: 'Photos = auto-remplissage', desc: 'Les métadonnées EXIF pré-remplissent la date et le lieu' },
+                        ].map((item) => (
+                            <Grid key={item.step} size={{ xs: 12, md: 4 }}>
+                                <Card sx={{ height: '100%' }}>
+                                    <CardContent>
+                                        <Box
+                                            sx={{
+                                                width: 32,
+                                                height: 32,
+                                                borderRadius: '50%',
+                                                bgcolor: 'primary.main',
+                                                color: 'white',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontWeight: 700,
+                                                mb: 1.5,
+                                            }}
+                                        >
+                                            {item.step}
+                                        </Box>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                                            {item.title}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {item.desc}
+                                        </Typography>
+                                    </CardContent>
                                 </Card>
                             </Grid>
                         ))}

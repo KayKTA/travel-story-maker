@@ -1,13 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Stack } from '@mui/material';
+import { Stack, Typography, Box, Paper } from '@mui/material';
 import JournalEntryCard from './JournalEntryCard';
-import JournalForm from './JournalForm';
-import EmptyState from '@/components/common/EmptyState';
 import { Book as BookIcon } from '@mui/icons-material';
-import { getSupabaseClient } from '@/lib/supabase/client';
-import type { JournalEntryWithMedia, JournalEntryFormData } from '@/types';
+import type { JournalEntryWithMedia } from '@/types';
 
 interface JournalListProps {
     entries: JournalEntryWithMedia[];
@@ -16,54 +12,24 @@ interface JournalListProps {
 }
 
 export default function JournalList({ entries, tripId, onRefresh }: JournalListProps) {
-    const [formOpen, setFormOpen] = useState(false);
-
-    const handleSubmit = async (data: JournalEntryFormData) => {
-        const supabase = getSupabaseClient();
-
-        const { error } = await supabase
-            .from('journal_entries')
-            .insert({
-                trip_id: data.trip_id,
-                entry_date: data.entry_date,
-                location: data.location || null,
-                lat: data.lat || null,
-                lng: data.lng || null,
-                mood: data.mood || null,
-                content: data.content,
-                content_source: data.content_source || 'typed',
-                tags: data.tags || null,
-            })
-            .select()
-            .single();
-
-        if (error) {
-            console.error('Error creating journal entry:', error);
-            throw error;
-        }
-
-        // Recharger la liste
-        onRefresh?.();
-    };
-
     if (entries.length === 0) {
         return (
-            <>
-                <EmptyState
-                    icon={<BookIcon sx={{ fontSize: 64 }} />}
-                    title="Aucune entrée de journal"
-                    description="Commencez à documenter votre voyage en créant votre première entrée."
-                    actionLabel="Créer une entrée"
-                    onAction={() => setFormOpen(true)}
-                />
-
-                <JournalForm
-                    open={formOpen}
-                    onClose={() => setFormOpen(false)}
-                    onSubmit={handleSubmit}
-                    tripId={tripId}
-                />
-            </>
+            <Paper
+                sx={{
+                    p: 6,
+                    textAlign: 'center',
+                    bgcolor: 'grey.50',
+                    borderRadius: 2,
+                }}
+            >
+                <BookIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                    Aucune entrée de journal
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                    Utilisez le bouton "Nouvelle entrée" pour commencer à documenter votre voyage.
+                </Typography>
+            </Paper>
         );
     }
 

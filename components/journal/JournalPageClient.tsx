@@ -1,30 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Box, Container, Grid, Skeleton } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
+import { Box, Container, Grid, Skeleton, Typography, Paper, Button } from '@mui/material';
+import { Flight as FlightIcon } from '@mui/icons-material';
 import PageHeader from '@/components/layout/PageHeader';
-import JournalList from '@/components/journal/JournalList';
-import JournalForm from '@/components/journal/JournalForm';
+import JournalEntryCard from '@/components/journal/JournalEntryCard';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import type { JournalEntryWithMedia, JournalEntryFormData } from '@/types';
+import type { JournalEntryWithMedia } from '@/types';
 
 export default function JournalPageClient() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [entries, setEntries] = useState<JournalEntryWithMedia[]>([]);
     const [loading, setLoading] = useState(true);
-    const [formOpen, setFormOpen] = useState(false);
 
-    // Ouvrir le formulaire si ?new=true dans l'URL
-    useEffect(() => {
-        if (searchParams.get('new') === 'true') {
-            setFormOpen(true);
-        }
-    }, [searchParams]);
-
-    // Charger les entrées
     useEffect(() => {
         loadEntries();
     }, []);
@@ -72,54 +61,11 @@ export default function JournalPageClient() {
         setLoading(false);
     };
 
-    const handleOpenForm = () => {
-        setFormOpen(true);
-        router.push('/journal?new=true', { scroll: false });
-    };
-
-    const handleCloseForm = () => {
-        setFormOpen(false);
-        router.push('/journal', { scroll: false });
-    };
-
-    const handleSubmit = async (data: JournalEntryFormData) => {
-        const supabase = getSupabaseClient();
-
-        const { error } = await supabase
-            .from('journal_entries')
-            .insert({
-                trip_id: data.trip_id,
-                entry_date: data.entry_date,
-                location: data.location || null,
-                lat: data.lat || null,
-                lng: data.lng || null,
-                mood: data.mood || null,
-                content: data.content,
-                content_source: data.content_source || 'typed',
-                tags: data.tags || null,
-            })
-            .select()
-            .single();
-
-        if (error) {
-            console.error('Error creating journal entry:', error);
-            throw error;
-        }
-
-        // Recharger la liste
-        await loadEntries();
-    };
-
     return (
         <Box>
             <PageHeader
                 title="Journal de voyage"
                 subtitle="Toutes vos entrées de journal"
-                action={{
-                    label: 'Nouvelle entrée',
-                    icon: <AddIcon />,
-                    onClick: handleOpenForm,
-                }}
             />
 
             <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -131,17 +77,39 @@ export default function JournalPageClient() {
                             </Grid>
                         ))}
                     </Grid>
+                ) : entries.length === 0 ? (
+                    <Paper
+                        sx={{
+                            p: 6,
+                            textAlign: 'center',
+                            bgcolor: 'grey.50',
+                            borderRadius: 3,
+                        }}
+                    >
+                        <FlightIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
+                        <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                            Aucune entrée de journal
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                            Pour créer une entrée, sélectionnez d'abord un voyage.
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            onClick={() => router.push('/trips')}
+                        >
+                            Voir mes voyages
+                        </Button>
+                    </Paper>
                 ) : (
-                    <JournalList entries={entries} onRefresh={loadEntries} />
+                    <Grid container spacing={2}>
+                        {entries.map((entry) => (
+                            <Grid key={entry.id} size={{ xs: 12 }}>
+                                <JournalEntryCard entry={entry} />
+                            </Grid>
+                        ))}
+                    </Grid>
                 )}
             </Container>
-
-            {/* Formulaire de création */}
-            <JournalForm
-                open={formOpen}
-                onClose={handleCloseForm}
-                onSubmit={handleSubmit}
-            />
         </Box>
     );
 }

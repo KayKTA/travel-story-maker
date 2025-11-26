@@ -20,9 +20,9 @@ import {
     Receipt as ReceiptIcon,
     AutoAwesome as StoriesIcon,
 } from '@mui/icons-material';
-// import JournalList from '@/components/journal/JournalList';
-// import MediaGallery from '@/components/media/MediaGallery';
-// import ExpenseList from '@/components/expenses/ExpenseList';
+import JournalList from '@/components/journal/JournalList';
+import MediaGallery from '@/components/media/MediaGallery';
+import ExpenseList from '@/components/expenses/ExpenseList';
 // import StoryList from '@/components/stories/StoryList';
 import { formatCurrency, getDurationDays } from '@/lib/utils/formatters';
 import { TRIP_MOODS } from '@/types/trip';
@@ -60,6 +60,7 @@ interface TripTabsProps {
         totalExpenses: number;
         storiesCount: number;
     };
+    onRefresh?: () => void;
 }
 
 export default function TripTabs({
@@ -69,6 +70,7 @@ export default function TripTabs({
     expenses,
     stories,
     stats,
+    onRefresh,
 }: TripTabsProps) {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -257,6 +259,26 @@ export default function TripTabs({
                         </Grid>
                     </Grid>
                 </TabPanel>
+
+                {/* Journal Tab */}
+                <TabPanel value={currentTab} index={1}>
+                    <JournalList entries={journalEntries} tripId={trip.id} onRefresh={onRefresh} />
+                </TabPanel>
+
+                {/* Media Tab */}
+                <TabPanel value={currentTab} index={2}>
+                    <MediaGallery media={media} tripId={trip.id} />
+                </TabPanel>
+
+                {/* Expenses Tab */}
+                <TabPanel value={currentTab} index={3}>
+                    <ExpenseList expenses={expenses} tripId={trip.id} />
+                </TabPanel>
+
+                {/* Stories Tab */}
+                {/* <TabPanel value={currentTab} index={4}>
+                    <StoryList stories={stories} tripId={trip.id} />
+                </TabPanel> */}
             </Container>
         </Box>
     );

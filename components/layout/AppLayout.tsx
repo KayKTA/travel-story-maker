@@ -23,10 +23,6 @@ import {
     Menu as MenuIcon,
     Home as HomeIcon,
     Luggage as LuggageIcon,
-    Book as BookIcon,
-    Receipt as ReceiptIcon,
-    AutoAwesome as AutoAwesomeIcon,
-    Map as MapIcon,
     ChevronLeft as ChevronLeftIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
@@ -42,11 +38,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
     { label: 'Accueil', href: '/', icon: <HomeIcon /> },
-    { label: 'Voyages', href: '/trips', icon: <LuggageIcon /> },
-    { label: 'Journal', href: '/journal', icon: <BookIcon /> },
-    { label: 'Dépenses', href: '/expenses', icon: <ReceiptIcon /> },
-    { label: 'Stories', href: '/stories', icon: <AutoAwesomeIcon /> },
-    { label: 'Carte', href: '/map', icon: <MapIcon /> },
+    { label: 'Mes Voyages', href: '/trips', icon: <LuggageIcon /> },
 ];
 
 interface AppLayoutProps {

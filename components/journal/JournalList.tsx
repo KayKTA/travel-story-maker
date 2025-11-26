@@ -1,26 +1,49 @@
 'use client';
 
 import { useState } from 'react';
-import { Stack, Button, Box } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Stack } from '@mui/material';
 import JournalEntryCard from './JournalEntryCard';
 import JournalForm from './JournalForm';
 import EmptyState from '@/components/common/EmptyState';
 import { Book as BookIcon } from '@mui/icons-material';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import type { JournalEntryWithMedia, JournalEntryFormData } from '@/types';
 
 interface JournalListProps {
     entries: JournalEntryWithMedia[];
     tripId?: string;
+    onRefresh?: () => void;
 }
 
-export default function JournalList({ entries, tripId }: JournalListProps) {
+export default function JournalList({ entries, tripId, onRefresh }: JournalListProps) {
     const [formOpen, setFormOpen] = useState(false);
 
     const handleSubmit = async (data: JournalEntryFormData) => {
-        // TODO: Implement with server action
-        console.log('Submit journal entry:', data);
-        // await createJournalEntry(data);
+        const supabase = getSupabaseClient();
+
+        const { error } = await supabase
+            .from('journal_entries')
+            .insert({
+                trip_id: data.trip_id,
+                entry_date: data.entry_date,
+                location: data.location || null,
+                lat: data.lat || null,
+                lng: data.lng || null,
+                mood: data.mood || null,
+                content: data.content,
+                content_source: data.content_source || 'typed',
+                tags: data.tags || null,
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error creating journal entry:', error);
+            throw error;
+        }
+
+        // Recharger la liste
+        onRefresh?.();
     };
 
     if (entries.length === 0) {
@@ -45,29 +68,10 @@ export default function JournalList({ entries, tripId }: JournalListProps) {
     }
 
     return (
-        <>
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setFormOpen(true)}
-                >
-                    Nouvelle entrée
-                </Button>
-            </Box>
-
-            <Stack spacing={2}>
-                {entries.map((entry) => (
-                    <JournalEntryCard key={entry.id} entry={entry} />
-                ))}
-            </Stack>
-
-            <JournalForm
-                open={formOpen}
-                onClose={() => setFormOpen(false)}
-                onSubmit={handleSubmit}
-                tripId={tripId}
-            />
-        </>
+        <Stack spacing={2}>
+            {entries.map((entry) => (
+                <JournalEntryCard key={entry.id} entry={entry} />
+            ))}
+        </Stack>
     );
 }

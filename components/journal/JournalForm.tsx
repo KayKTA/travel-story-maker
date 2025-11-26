@@ -40,6 +40,37 @@ interface JournalFormProps {
     isEditing?: boolean;
 }
 
+const emptyFormData: JournalEntryFormData = {
+    trip_id: '',
+    entry_date: new Date().toISOString().split('T')[0],
+    location: '',
+    lat: undefined,
+    lng: undefined,
+    mood: undefined,
+    content: '',
+    content_source: 'typed',
+    tags: '',
+};
+
+// Common MenuProps for Select components to fix z-index
+const selectMenuProps = {
+    sx: { zIndex: 1500 },
+    anchorOrigin: {
+        vertical: 'bottom' as const,
+        horizontal: 'left' as const,
+    },
+    transformOrigin: {
+        vertical: 'top' as const,
+        horizontal: 'left' as const,
+    },
+};
+
+// Common popper props for DatePicker to fix z-index
+const datePickerPopperProps = {
+    sx: { zIndex: 1500 },
+    placement: 'bottom-start' as const,
+};
+
 export default function JournalForm({
     open,
     onClose,
@@ -51,21 +82,36 @@ export default function JournalForm({
     const [inputMode, setInputMode] = useState<'text' | 'audio'>('text');
     const [trips, setTrips] = useState<Trip[]>([]);
     const [loadingTrips, setLoadingTrips] = useState(true);
-
-    const [formData, setFormData] = useState<JournalEntryFormData>({
-        trip_id: tripId || initialData?.trip_id || '',
-        entry_date: initialData?.entry_date || new Date().toISOString().split('T')[0],
-        location: initialData?.location || '',
-        lat: initialData?.lat,
-        lng: initialData?.lng,
-        mood: initialData?.mood,
-        content: initialData?.content || '',
-        content_source: initialData?.content_source || 'typed',
-        tags: initialData?.tags || '',
-    });
-
+    const [formData, setFormData] = useState<JournalEntryFormData>(emptyFormData);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<string[]>([]);
+
+    // Reset form when dialog opens
+    useEffect(() => {
+        if (open) {
+            setInputMode('text');
+            setErrors([]);
+
+            if (initialData) {
+                setFormData({
+                    trip_id: tripId || initialData.trip_id || '',
+                    entry_date: initialData.entry_date || new Date().toISOString().split('T')[0],
+                    location: initialData.location || '',
+                    lat: initialData.lat,
+                    lng: initialData.lng,
+                    mood: initialData.mood,
+                    content: initialData.content || '',
+                    content_source: initialData.content_source || 'typed',
+                    tags: initialData.tags || '',
+                });
+            } else {
+                setFormData({
+                    ...emptyFormData,
+                    trip_id: tripId || '',
+                });
+            }
+        }
+    }, [open, initialData, tripId]);
 
     // Load trips for selector
     useEffect(() => {
@@ -90,6 +136,15 @@ export default function JournalForm({
         setErrors([]);
     };
 
+    const handleClose = () => {
+        if (!loading) {
+            setFormData(emptyFormData);
+            setErrors([]);
+            setInputMode('text');
+            onClose();
+        }
+    };
+
     const handleTranscriptionComplete = (text: string) => {
         setFormData((prev) => ({
             ...prev,
@@ -109,6 +164,7 @@ export default function JournalForm({
         setLoading(true);
         try {
             await onSubmit(formData);
+            setFormData(emptyFormData);
             onClose();
         } catch (error) {
             setErrors(['Une erreur est survenue. Veuillez réessayer.']);
@@ -118,12 +174,22 @@ export default function JournalForm({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            maxWidth="md"
+            fullWidth
+            sx={{
+                '& .MuiDialog-paper': {
+                    overflow: 'visible',
+                },
+            }}
+        >
             <DialogTitle>
                 {isEditing ? 'Modifier l\'entrée' : 'Nouvelle entrée de journal'}
             </DialogTitle>
 
-            <DialogContent dividers>
+            <DialogContent dividers sx={{ overflow: 'visible' }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fr}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
                         {errors.length > 0 && (
@@ -143,9 +209,12 @@ export default function JournalForm({
                                         value={formData.trip_id}
                                         label="Voyage"
                                         onChange={(e) => handleChange('trip_id', e.target.value)}
+                                        MenuProps={selectMenuProps}
                                     >
                                         {loadingTrips ? (
                                             <MenuItem disabled>Chargement...</MenuItem>
+                                        ) : trips.length === 0 ? (
+                                            <MenuItem disabled>Aucun voyage - créez-en un d'abord</MenuItem>
                                         ) : (
                                             trips.map((trip) => (
                                                 <MenuItem key={trip.id} value={trip.id}>
@@ -171,6 +240,7 @@ export default function JournalForm({
                                     }
                                     slotProps={{
                                         textField: { fullWidth: true, required: true },
+                                        popper: datePickerPopperProps,
                                     }}
                                 />
                             </Grid>
@@ -196,6 +266,7 @@ export default function JournalForm({
                                         value={formData.mood || ''}
                                         label="Humeur"
                                         onChange={(e) => handleChange('mood', e.target.value as JournalMood)}
+                                        MenuProps={selectMenuProps}
                                     >
                                         <MenuItem value="">
                                             <em>Non définie</em>
@@ -275,9 +346,9 @@ export default function JournalForm({
                                 <TextField
                                     label="Latitude"
                                     type="number"
-                                    value={formData.lat || ''}
+                                    value={formData.lat ?? ''}
                                     onChange={(e) =>
-                                        handleChange('lat', parseFloat(e.target.value) || undefined)
+                                        handleChange('lat', e.target.value ? parseFloat(e.target.value) : undefined)
                                     }
                                     fullWidth
                                     inputProps={{ step: 'any' }}
@@ -287,9 +358,9 @@ export default function JournalForm({
                                 <TextField
                                     label="Longitude"
                                     type="number"
-                                    value={formData.lng || ''}
+                                    value={formData.lng ?? ''}
                                     onChange={(e) =>
-                                        handleChange('lng', parseFloat(e.target.value) || undefined)
+                                        handleChange('lng', e.target.value ? parseFloat(e.target.value) : undefined)
                                     }
                                     fullWidth
                                     inputProps={{ step: 'any' }}
@@ -301,7 +372,7 @@ export default function JournalForm({
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose} disabled={loading}>
+                <Button onClick={handleClose} disabled={loading}>
                     Annuler
                 </Button>
                 <Button

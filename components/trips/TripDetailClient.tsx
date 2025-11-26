@@ -9,6 +9,9 @@ import {
     Skeleton,
     Stack,
     Fab,
+    SpeedDial,
+    SpeedDialAction,
+    SpeedDialIcon,
 } from '@mui/material';
 import {
     CalendarToday as CalendarIcon,
@@ -16,12 +19,15 @@ import {
     Videocam as VideoIcon,
     ChevronLeft as BackIcon,
     Add as AddIcon,
+    Book as JournalIcon,
+    Receipt as ExpenseIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { formatDateRange } from '@/lib/utils/formatters';
 import TripTabs from './TripTabs';
 import JournalForm from '@/components/journal/JournalForm';
+import ExpenseForm from '@/components/expenses/ExpenseForm';
 import type { Trip, JournalEntry, MediaAsset, Expense, Story, JournalEntryFormData } from '@/types';
 
 interface JournalEntryWithMedia extends JournalEntry {
@@ -40,6 +46,8 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
     const [stories, setStories] = useState<Story[]>([]);
     const [loading, setLoading] = useState(true);
     const [journalFormOpen, setJournalFormOpen] = useState(false);
+    const [expenseFormOpen, setExpenseFormOpen] = useState(false);
+    const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
     const loadData = async () => {
         const supabase = getSupabaseClient();
@@ -106,6 +114,10 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
         await loadData();
     };
 
+    const handleExpenseSubmit = async () => {
+        await loadData();
+    };
+
     if (loading) {
         return (
             <Box sx={{ p: 3 }}>
@@ -147,6 +159,11 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
     const tripName = `${trip.country}${trip.city ? ` - ${trip.city}` : ''}`;
 
+    const speedDialActions = [
+        { icon: <JournalIcon />, name: 'Journal', onClick: () => setJournalFormOpen(true) },
+        { icon: <ExpenseIcon />, name: 'Dépense', onClick: () => setExpenseFormOpen(true) },
+    ];
+
     return (
         <Box sx={{ pb: 4 }}>
             {/* Header */}
@@ -181,22 +198,35 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                         )}
                     </Box>
 
-                    {/* New Entry Button in Header */}
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => setJournalFormOpen(true)}
-                        sx={{
-                            bgcolor: 'white',
-                            color: 'primary.main',
-                            fontWeight: 600,
-                            '&:hover': {
-                                bgcolor: 'grey.100',
-                            },
-                        }}
-                    >
-                        Nouvelle entrée
-                    </Button>
+                    {/* Action Buttons in Header */}
+                    <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => setJournalFormOpen(true)}
+                            sx={{
+                                bgcolor: 'white',
+                                color: 'primary.main',
+                                fontWeight: 600,
+                                '&:hover': { bgcolor: 'grey.100' },
+                            }}
+                        >
+                            Journal
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<ExpenseIcon />}
+                            onClick={() => setExpenseFormOpen(true)}
+                            sx={{
+                                borderColor: 'white',
+                                color: 'white',
+                                fontWeight: 600,
+                                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', borderColor: 'white' },
+                            }}
+                        >
+                            Dépense
+                        </Button>
+                    </Stack>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, flexWrap: 'wrap' }}>
@@ -245,19 +275,42 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                 tripName={tripName}
             />
 
-            {/* Floating Action Button for mobile */}
-            <Fab
-                color="primary"
-                onClick={() => setJournalFormOpen(true)}
+            {/* Expense Form Dialog */}
+            <ExpenseForm
+                open={expenseFormOpen}
+                onClose={() => setExpenseFormOpen(false)}
+                onSubmit={handleExpenseSubmit}
+                tripId={tripId}
+                tripName={tripName}
+            />
+
+            {/* Speed Dial for mobile */}
+            <SpeedDial
+                ariaLabel="Actions"
                 sx={{
                     position: 'fixed',
                     bottom: 24,
                     right: 24,
                     display: { xs: 'flex', sm: 'none' },
                 }}
+                icon={<SpeedDialIcon />}
+                open={speedDialOpen}
+                onOpen={() => setSpeedDialOpen(true)}
+                onClose={() => setSpeedDialOpen(false)}
             >
-                <AddIcon />
-            </Fab>
+                {speedDialActions.map((action) => (
+                    <SpeedDialAction
+                        key={action.name}
+                        icon={action.icon}
+                        tooltipTitle={action.name}
+                        tooltipOpen
+                        onClick={() => {
+                            setSpeedDialOpen(false);
+                            action.onClick();
+                        }}
+                    />
+                ))}
+            </SpeedDial>
         </Box>
     );
 }

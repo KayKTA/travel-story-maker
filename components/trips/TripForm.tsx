@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -22,6 +22,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { fr } from 'date-fns/locale';
 import { TRIP_MOODS, type TripFormData, type Trip, type TripMood } from '@/types/trip';
+import { validateTrip } from '@/lib/utils/validators';
 
 interface TripFormProps {
     open: boolean;
@@ -31,6 +32,17 @@ interface TripFormProps {
     isEditing?: boolean;
 }
 
+const emptyFormData: TripFormData = {
+    country: '',
+    city: '',
+    start_date: '',
+    end_date: '',
+    mood: undefined,
+    lat: undefined,
+    lng: undefined,
+    description: '',
+};
+
 export default function TripForm({
     open,
     onClose,
@@ -38,36 +50,83 @@ export default function TripForm({
     initialData,
     isEditing = false,
 }: TripFormProps) {
-    const [formData, setFormData] = useState<TripFormData>({
-        country: initialData?.country || '',
-        city: initialData?.city || '',
-        start_date: initialData?.start_date || '',
-        end_date: initialData?.end_date || '',
-        mood: (initialData?.mood as TripMood) || undefined,
-        lat: initialData?.lat || undefined,
-        lng: initialData?.lng || undefined,
-        description: initialData?.description || '',
-    });
-
+    const [formData, setFormData] = useState<TripFormData>(emptyFormData);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<string[]>([]);
+
+    // Reset form when dialog opens
+    useEffect(() => {
+        if (open) {
+            if (initialData) {
+                setFormData({
+                    country: initialData.country || '',
+                    city: initialData.city || '',
+                    start_date: initialData.start_date || '',
+                    end_date: initialData.end_date || '',
+                    mood: (initialData.mood as TripMood) || undefined,
+                    lat: initialData.lat ?? undefined,
+                    lng: initialData.lng ?? undefined,
+                    description: initialData.description || '',
+                });
+            } else {
+                setFormData(emptyFormData);
+            }
+            setErrors([]);
+        }
+    }, [open, initialData]);
 
     const handleChange = (field: keyof TripFormData, value: unknown) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         setErrors([]);
     };
 
-    const handleSubmit = async () => {
+    const handleClose = () => {
+        if (!loading) {
+            setFormData(emptyFormData);
+            setErrors([]);
+            onClose();
+        }
+    };
 
+    const handleSubmit = async () => {
+        const validation = validateTrip(formData);
+        if (!validation.valid) {
+            setErrors(validation.errors);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await onSubmit(formData);
+            setFormData(emptyFormData);
+            onClose();
+        } catch (error) {
+            setErrors(['Une erreur est survenue. Veuillez réessayer.']);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            maxWidth="sm"
+            fullWidth
+            // Disable portal for nested popovers to work correctly
+            disablePortal={false}
+            // Ensure dialog has proper stacking context
+            sx={{
+                '& .MuiDialog-paper': {
+                    overflow: 'visible',
+                },
+            }}
+        >
             <DialogTitle>
                 {isEditing ? 'Modifier le voyage' : 'Nouveau voyage'}
             </DialogTitle>
 
-            <DialogContent dividers>
+            <DialogContent dividers sx={{ overflow: 'visible' }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={fr}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
                         {errors.length > 0 && (
@@ -85,6 +144,7 @@ export default function TripForm({
                             required
                             fullWidth
                             placeholder="Ex: Argentine"
+                            autoFocus
                         />
 
                         <TextField
@@ -108,6 +168,11 @@ export default function TripForm({
                                     }
                                     slotProps={{
                                         textField: { fullWidth: true, required: true },
+                                        popper: {
+                                            // Force popper to render above dialog
+                                            sx: { zIndex: 1500 },
+                                            placement: 'bottom-start',
+                                        },
                                     }}
                                 />
                             </Grid>
@@ -126,6 +191,10 @@ export default function TripForm({
                                     }
                                     slotProps={{
                                         textField: { fullWidth: true },
+                                        popper: {
+                                            sx: { zIndex: 1500 },
+                                            placement: 'bottom-start',
+                                        },
                                     }}
                                 />
                             </Grid>
@@ -137,6 +206,19 @@ export default function TripForm({
                                 value={formData.mood || ''}
                                 label="Humeur globale"
                                 onChange={(e) => handleChange('mood', e.target.value as TripMood)}
+                                MenuProps={{
+                                    // Force menu to render above dialog
+                                    sx: { zIndex: 1500 },
+                                    // Ensure menu is positioned correctly
+                                    anchorOrigin: {
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    },
+                                    transformOrigin: {
+                                        vertical: 'top',
+                                        horizontal: 'left',
+                                    },
+                                }}
                             >
                                 <MenuItem value="">
                                     <em>Non définie</em>
@@ -154,9 +236,9 @@ export default function TripForm({
                                 <TextField
                                     label="Latitude"
                                     type="number"
-                                    value={formData.lat || ''}
+                                    value={formData.lat ?? ''}
                                     onChange={(e) =>
-                                        handleChange('lat', parseFloat(e.target.value) || undefined)
+                                        handleChange('lat', e.target.value ? parseFloat(e.target.value) : undefined)
                                     }
                                     fullWidth
                                     inputProps={{ step: 'any' }}
@@ -167,9 +249,9 @@ export default function TripForm({
                                 <TextField
                                     label="Longitude"
                                     type="number"
-                                    value={formData.lng || ''}
+                                    value={formData.lng ?? ''}
                                     onChange={(e) =>
-                                        handleChange('lng', parseFloat(e.target.value) || undefined)
+                                        handleChange('lng', e.target.value ? parseFloat(e.target.value) : undefined)
                                     }
                                     fullWidth
                                     inputProps={{ step: 'any' }}
@@ -192,7 +274,7 @@ export default function TripForm({
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose} disabled={loading}>
+                <Button onClick={handleClose} disabled={loading}>
                     Annuler
                 </Button>
                 <Button

@@ -4,190 +4,179 @@ import { createTheme, responsiveFontSizes } from '@mui/material/styles';
 
 // ============================================
 // Travel Story Maker - Theme Configuration
+// Mochi Yellow – une seule gamme de jaunes
 // ============================================
 
 const palette = {
     primary: {
-        main: '#0F766E', // Teal - reminiscent of ocean & nature
-        light: '#14B8A6',
-        dark: '#0D9488',
-        contrastText: '#FFFFFF',
+        main: '#F5B82E',      // jaune principal
+        light: '#FFE69A',     // jaune clair
+        dark: '#C99A1D',      // jaune plus foncé
+        contrastText: '#3F3008', // jaune très foncé pour le texte
     },
     secondary: {
-        main: '#F59E0B', // Amber - warmth, sunset
-        light: '#FBBF24',
-        dark: '#D97706',
-        contrastText: '#000000',
+        // jaune un peu plus “orangé” pour varier
+        main: '#E39A2E',
+        light: '#F4C170',
+        dark: '#B87411',
+        contrastText: '#3F3008',
     },
     error: {
-        main: '#EF4444',
-        light: '#F87171',
-        dark: '#DC2626',
+        main: '#D64545',
+        light: '#E86B6B',
+        dark: '#B33030',
     },
     warning: {
-        main: '#F59E0B',
-        light: '#FBBF24',
-        dark: '#D97706',
+        main: '#F5B82E',
+        light: '#FFE69A',
+        dark: '#C99A1D',
     },
     success: {
-        main: '#10B981',
-        light: '#34D399',
-        dark: '#059669',
+        main: '#6BAF3D', // vert chaud (ok pour feedback)
+        light: '#91C86B',
+        dark: '#447927',
     },
     info: {
-        main: '#3B82F6',
-        light: '#60A5FA',
-        dark: '#2563EB',
+        main: '#E39A2E',
+        light: '#F4C170',
+        dark: '#B87411',
     },
     grey: {
-        50: '#F9FAFB',
-        100: '#F3F4F6',
-        200: '#E5E7EB',
-        300: '#D1D5DB',
-        400: '#9CA3AF',
-        500: '#6B7280',
-        600: '#4B5563',
-        700: '#374151',
-        800: '#1F2937',
-        900: '#111827',
+        50: '#FFF7DA',
+        100: '#FBECC2',
+        200: '#F2DCA0',
+        300: '#E3C36E',
+        400: '#CCA247',
+        500: '#A27C32',
+        600: '#7F5F23',
+        700: '#5F4519',
+        800: '#3F3008', // jaune très foncé au lieu de noir
+        900: '#2E2105',
     },
     background: {
-        default: '#FAFAFA',
-        paper: '#FFFFFF',
+        default: '#F5B82E', // body
+        paper: '#FFFDF5',   // cartes / panneaux
     },
     text: {
-        primary: '#1F2937',
-        secondary: '#4B5563',
-        disabled: '#9CA3AF',
+        primary: '#3F3008',   // texte principal (jaune très foncé)
+        secondary: '#7F5F23', // texte secondaire
+        disabled: '#A27C32',
     },
-};
+} as const;
 
-// Mood colors for consistent mood visualization
+// Mood colors (adaptés à la palette)
 export const moodColors: Record<string, string> = {
     // Trip moods
-    amazing: '#10B981',
-    great: '#34D399',
-    good: '#60A5FA',
-    mixed: '#FBBF24',
-    challenging: '#F97316',
-    difficult: '#EF4444',
+    amazing: '#6BAF3D',
+    great: '#91C86B',
+    good: '#E39A2E',
+    mixed: '#F2DCA0',
+    challenging: '#E39A2E',
+    difficult: '#D64545',
+
     // Journal moods
-    excited: '#EC4899',
-    happy: '#10B981',
-    peaceful: '#60A5FA',
-    tired: '#9CA3AF',
-    frustrated: '#F97316',
-    sad: '#6366F1',
-    adventurous: '#F59E0B',
-    inspired: '#8B5CF6',
+    excited: '#D64545',
+    happy: '#F5B82E',
+    tired: '#A27C32',
+    frustrated: '#E39A2E',
+    sad: '#5F4519',
+    adventurous: '#CCA247',
+    inspired: '#C87BAC',
+    chill: '#6BAF3D',
+    neutral: '#7F5F23',
+    in_love: '#D64545',
+    underwhelmed: '#A27C32',
 };
 
-// Category colors for expenses
+// Category colors pour les dépenses (toujours cohérents avec la palette)
 export const categoryColors: Record<string, string> = {
-    transport: '#3B82F6',
-    logement: '#8B5CF6',
-    food: '#F59E0B',
-    activite: '#10B981',
-    shopping: '#EC4899',
-    autre: '#6B7280',
+    transport: '#E39A2E',
+    logement: '#C87BAC',
+    food: '#F2DCA0',
+    activite: '#6BAF3D',
+    shopping: '#D64545',
+    autre: '#7F5F23',
 };
 
 let theme = createTheme({
     palette,
     typography: {
-        fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+        fontFamily:
+            '"DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         h1: {
-            fontSize: '2.5rem',
+            fontSize: '3.0rem',
             fontWeight: 700,
-            lineHeight: 1.2,
-            letterSpacing: '-0.02em',
+            lineHeight: 1.05,
+            letterSpacing: '-0.03em',
         },
         h2: {
-            fontSize: '2rem',
-            fontWeight: 600,
-            lineHeight: 1.3,
-            letterSpacing: '-0.01em',
+            fontSize: '2.2rem',
+            fontWeight: 700,
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
         },
         h3: {
-            fontSize: '1.5rem',
-            fontWeight: 600,
-            lineHeight: 1.4,
+            fontSize: '1.6rem',
+            fontWeight: 700,
+            lineHeight: 1.15,
         },
         h4: {
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            lineHeight: 1.4,
+            fontSize: '1.3rem',
+            fontWeight: 700,
+            lineHeight: 1.2,
         },
         h5: {
-            fontSize: '1.125rem',
-            fontWeight: 500,
-            lineHeight: 1.5,
+            fontSize: '1.05rem',
+            fontWeight: 600,
+            lineHeight: 1.3,
         },
         h6: {
-            fontSize: '1rem',
-            fontWeight: 500,
-            lineHeight: 1.5,
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            lineHeight: 1.35,
         },
         body1: {
-            fontSize: '1rem',
+            fontSize: '0.98rem',
             lineHeight: 1.6,
+            fontWeight: 500,
         },
         body2: {
-            fontSize: '0.875rem',
-            lineHeight: 1.6,
+            fontSize: '0.86rem',
+            lineHeight: 1.55,
+            fontWeight: 500,
         },
         button: {
             textTransform: 'none',
-            fontWeight: 500,
+            fontWeight: 700,
+            letterSpacing: 0.4,
         },
         caption: {
-            fontSize: '0.75rem',
-            lineHeight: 1.5,
+            fontSize: '0.74rem',
+            lineHeight: 1.4,
+            fontWeight: 500,
         },
     },
     shape: {
         borderRadius: 12,
     },
-    shadows: [
-        'none',
-        '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-        '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    ],
+    // Pas d’ombres globales → look très plat
+    shadows: Array(25).fill('none') as any,
     components: {
-        MuiButton: {
+        MuiCssBaseline: {
+            styleOverrides: {
+                body: {
+                    backgroundColor: palette.background.default,
+                    color: palette.text.primary,
+                },
+            },
+        },
+        MuiPaper: {
             styleOverrides: {
                 root: {
-                    borderRadius: 8,
-                    padding: '10px 20px',
-                    fontWeight: 500,
-                },
-                contained: {
+                    backgroundColor: palette.background.paper,
+                    borderRadius: 16,
+                    border: '1px solid rgba(63, 48, 8, 0.06)',
                     boxShadow: 'none',
-                    '&:hover': {
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    },
                 },
             },
         },
@@ -195,27 +184,47 @@ let theme = createTheme({
             styleOverrides: {
                 root: {
                     borderRadius: 16,
-                    boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-                    border: '1px solid',
-                    borderColor: palette.grey[200],
+                    border: '1px solid rgba(63, 48, 8, 0.06)',
+                    boxShadow: 'none',
                 },
             },
         },
-        MuiCardContent: {
+        MuiButton: {
             styleOverrides: {
                 root: {
-                    padding: 20,
-                    '&:last-child': {
-                        paddingBottom: 20,
+                    borderRadius: 999,
+                    padding: '9px 20px',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                },
+                contained: {
+                    boxShadow: 'none',
+                    '&:hover': {
+                        boxShadow: 'none',
                     },
                 },
-            },
-        },
-        MuiTextField: {
-            styleOverrides: {
-                root: {
-                    '& .MuiOutlinedInput-root': {
-                        borderRadius: 8,
+                containedPrimary: {
+                    backgroundColor: palette.primary.main,
+                    color: palette.primary.contrastText,
+                    '&:hover': {
+                        backgroundColor: palette.primary.dark,
+                    },
+                },
+                containedSecondary: {
+                    backgroundColor: palette.secondary.main,
+                    color: palette.secondary.contrastText,
+                    '&:hover': {
+                        backgroundColor: palette.secondary.dark,
+                    },
+                },
+                outlined: {
+                    borderWidth: 1,
+                    borderColor: palette.primary.dark,
+                    color: palette.primary.dark,
+                    '&:hover': {
+                        borderWidth: 1,
+                        borderColor: palette.primary.dark,
+                        backgroundColor: 'rgba(242, 220, 160, 0.3)',
                     },
                 },
             },
@@ -223,15 +232,45 @@ let theme = createTheme({
         MuiChip: {
             styleOverrides: {
                 root: {
-                    borderRadius: 8,
-                    fontWeight: 500,
+                    borderRadius: 999,
+                    fontWeight: 600,
+                },
+                filled: {
+                    backgroundColor: palette.grey[100],
+                },
+            },
+        },
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    '& .MuiOutlinedInput-root': {
+                        borderRadius: 10,
+                    },
                 },
             },
         },
         MuiDialog: {
             styleOverrides: {
                 paper: {
-                    borderRadius: 16,
+                    borderRadius: 20,
+                },
+            },
+        },
+        MuiAppBar: {
+            styleOverrides: {
+                root: {
+                    boxShadow: 'none',
+                    backgroundColor: palette.primary.dark,
+                    color: palette.primary.contrastText,
+                },
+            },
+        },
+        MuiTabs: {
+            styleOverrides: {
+                indicator: {
+                    height: 3,
+                    borderRadius: 999,
+                    backgroundColor: palette.primary.dark,
                 },
             },
         },
@@ -239,30 +278,16 @@ let theme = createTheme({
             styleOverrides: {
                 root: {
                     textTransform: 'none',
-                    fontWeight: 500,
-                    fontSize: '0.9375rem',
-                },
-            },
-        },
-        MuiFab: {
-            styleOverrides: {
-                root: {
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                },
-            },
-        },
-        MuiDrawer: {
-            styleOverrides: {
-                paper: {
-                    borderRight: 'none',
-                    boxShadow: '4px 0 6px -1px rgb(0 0 0 / 0.1)',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    minHeight: 48,
                 },
             },
         },
     },
 });
 
-// Apply responsive font sizes
+// Applique les tailles de police responsives
 theme = responsiveFontSizes(theme);
 
 export default theme;

@@ -1,5 +1,6 @@
 'use client';
 
+import { alpha } from '@mui/material/styles';
 import {
     Card,
     CardContent,
@@ -8,6 +9,7 @@ import {
     Typography,
     Chip,
     Stack,
+    useTheme,
 } from '@mui/material';
 import {
     CalendarMonth as CalendarIcon,
@@ -25,6 +27,7 @@ interface TripCardProps {
 }
 
 export default function TripCard({ trip }: TripCardProps) {
+    const theme = useTheme();
     const moodData = TRIP_MOODS.find((m) => m.value === trip.mood);
 
     return (
@@ -33,25 +36,31 @@ export default function TripCard({ trip }: TripCardProps) {
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out',
                 '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4,
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[2],
                 },
             }}
         >
             <CardActionArea
                 component={Link}
                 href={`/trips/${trip.id}`}
-                sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                sx={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                }}
             >
-                {/* Cover Image or Gradient */}
+                {/* Cover */}
                 <Box
                     sx={{
                         height: 140,
                         background: trip.cover_image_url
                             ? `url(${trip.cover_image_url}) center/cover`
-                            : 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)',
+                            : (theme) =>
+                                  `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`,
                         position: 'relative',
                     }}
                 >
@@ -59,23 +68,28 @@ export default function TripCard({ trip }: TripCardProps) {
                     <Box
                         sx={{
                             position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
+                            inset: 'auto 0 0 0',
                             p: 2,
-                            background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
+                            background: (theme) =>
+                                `linear-gradient(to top, ${alpha(
+                                    theme.palette.common.black,
+                                    0.7,
+                                )}, transparent)`,
                         }}
                     >
                         <Typography
-                            variant="h5"
-                            sx={{ color: 'white', fontWeight: 700 }}
+                            variant="h6"
+                            sx={{
+                                color: 'common.white',
+                                fontWeight: 700,
+                            }}
                         >
                             {trip.country}
                         </Typography>
                         {trip.city && (
                             <Typography
                                 variant="body2"
-                                sx={{ color: 'rgba(255,255,255,0.85)' }}
+                                sx={{ color: 'common.white', opacity: 0.85 }}
                             >
                                 {trip.city}
                             </Typography>
@@ -91,7 +105,7 @@ export default function TripCard({ trip }: TripCardProps) {
                                 position: 'absolute',
                                 top: 12,
                                 right: 12,
-                                bgcolor: 'rgba(255,255,255,0.95)',
+                                bgcolor: 'background.paper',
                                 fontWeight: 500,
                             }}
                         />
@@ -101,9 +115,19 @@ export default function TripCard({ trip }: TripCardProps) {
                 {/* Content */}
                 <CardContent sx={{ flex: 1 }}>
                     {/* Date */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            mb: 2,
+                        }}
+                    >
                         <CalendarIcon fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                        >
                             {formatDateRange(trip.start_date, trip.end_date)}
                         </Typography>
                         <Chip
@@ -117,25 +141,52 @@ export default function TripCard({ trip }: TripCardProps) {
                     {/* Stats */}
                     <Stack direction="row" spacing={2} flexWrap="wrap">
                         {trip.photos_count > 0 && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                }}
+                            >
                                 <PhotoIcon fontSize="small" color="action" />
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
                                     {trip.photos_count}
                                 </Typography>
                             </Box>
                         )}
                         {trip.videos_count > 0 && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                }}
+                            >
                                 <VideoIcon fontSize="small" color="action" />
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
                                     {trip.videos_count}
                                 </Typography>
                             </Box>
                         )}
                         {trip.total_expenses > 0 && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                }}
+                            >
                                 <EuroIcon fontSize="small" color="action" />
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
                                     {formatCurrency(trip.total_expenses)}
                                 </Typography>
                             </Box>

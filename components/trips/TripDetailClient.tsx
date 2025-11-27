@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
-    IconButton,
-    Chip,
     Skeleton,
     Stack,
     SpeedDial,
@@ -13,22 +11,26 @@ import {
     SpeedDialIcon,
     useTheme,
     useMediaQuery,
+    IconButton,
 } from '@mui/material';
 import {
-    CalendarToday as CalendarIcon,
-    PhotoCamera as PhotoIcon,
-    Videocam as VideoIcon,
-    ArrowBack as BackIcon,
     Book as JournalIcon,
     Receipt as ExpenseIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import { formatDateRange } from '@/lib/utils/formatters';
 import TripTabs from './TripTabs';
 import JournalForm from '@/components/journal/JournalForm';
 import ExpenseForm from '@/components/expenses/ExpenseForm';
-import type { Trip, JournalEntry, MediaAsset, Expense, Story, JournalEntryFormData } from '@/types';
+import TripHeaderBar from './TripHeaderBar';
+import type {
+    Trip,
+    JournalEntry,
+    MediaAsset,
+    Expense,
+    Story,
+    JournalEntryFormData,
+} from '@/types';
 
 interface JournalEntryWithMedia extends JournalEntry {
     media_assets: MediaAsset[];
@@ -77,10 +79,14 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
         setMedia(mediaData || []);
 
-        const entriesWithMedia: JournalEntryWithMedia[] = (entriesData || []).map((entry) => ({
-            ...entry,
-            media_assets: (mediaData || []).filter((m) => m.journal_entry_id === entry.id),
-        }));
+        const entriesWithMedia: JournalEntryWithMedia[] = (entriesData || []).map(
+            (entry) => ({
+                ...entry,
+                media_assets: (mediaData || []).filter(
+                    (m) => m.journal_entry_id === entry.id,
+                ),
+            }),
+        );
 
         setEntries(entriesWithMedia);
 
@@ -107,7 +113,7 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
         loadData();
     }, [tripId]);
 
-    const handleJournalSubmit = async (data: JournalEntryFormData, mediaAssetIds?: string[]) => {
+    const handleJournalSubmit = async (data: JournalEntryFormData) => {
         await loadData();
     };
 
@@ -118,10 +124,15 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
     if (loading) {
         return (
             <Box>
-                <Box sx={{ bgcolor: 'primary.main', p: 2, pb: 3 }}>
-                    <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
-                    <Skeleton variant="text" width={150} height={36} sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.2)' }} />
-                    <Skeleton variant="text" width={100} height={24} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+                <Box sx={{ bgcolor: 'background.paper', p: 2, pb: 3 }}>
+                    <Skeleton variant="circular" width={40} height={40} />
+                    <Skeleton
+                        variant="text"
+                        width={150}
+                        height={36}
+                        sx={{ mt: 2 }}
+                    />
+                    <Skeleton variant="text" width={100} height={24} />
                 </Box>
                 <Box sx={{ p: 2 }}>
                     <Skeleton variant="rounded" height={48} sx={{ mb: 2 }} />
@@ -140,7 +151,7 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
             <Box sx={{ p: 3, textAlign: 'center' }}>
                 <Typography>Voyage non trouvé</Typography>
                 <IconButton component={Link} href="/trips" sx={{ mt: 2 }}>
-                    <BackIcon />
+                    {/* Back simple */}
                 </IconButton>
             </Box>
         );
@@ -148,7 +159,10 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
     const photoCount = media.filter((m) => m.media_type === 'photo').length;
     const videoCount = media.filter((m) => m.media_type === 'video').length;
-    const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const totalExpenses = expenses.reduce(
+        (sum, e) => sum + (e.amount || 0),
+        0,
+    );
 
     const stats = {
         journalCount: entries.length,
@@ -161,125 +175,33 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
     const tripName = `${trip.country}${trip.city ? ` - ${trip.city}` : ''}`;
 
     const speedDialActions = [
-        { icon: <JournalIcon />, name: 'Journal', onClick: () => setJournalFormOpen(true) },
-        { icon: <ExpenseIcon />, name: 'Dépense', onClick: () => setExpenseFormOpen(true) },
+        {
+            icon: <JournalIcon />,
+            name: 'Journal',
+            onClick: () => setJournalFormOpen(true),
+        },
+        {
+            icon: <ExpenseIcon />,
+            name: 'Dépense',
+            onClick: () => setExpenseFormOpen(true),
+        },
     ];
 
     return (
-        <Box sx={{ pb: { xs: 10, sm: 4 }, minHeight: '100vh', bgcolor: 'grey.50' }}>
-            {/* Compact Mobile Header */}
-            <Box
-                sx={{
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    pt: { xs: 1, sm: 2 },
-                    pb: { xs: 2, sm: 3 },
-                    px: { xs: 2, sm: 3 },
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100,
-                }}
-            >
-                {/* Top row: Back + Actions */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                    <IconButton
-                        component={Link}
-                        href="/trips"
-                        sx={{
-                            color: 'white',
-                            ml: -1,
-                            bgcolor: 'rgba(255,255,255,0.1)',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
-                        }}
-                        size="small"
-                    >
-                        <BackIcon />
-                    </IconButton>
+        <Box
+            sx={{
+                pb: { xs: 10, sm: 4 },
+                minHeight: '100vh',
+                bgcolor: 'background.default',
+            }}
+        >
+            <TripHeaderBar
+                trip={trip}
+                stats={{ photosCount: photoCount, videosCount: videoCount }}
+                onOpenJournal={() => setJournalFormOpen(true)}
+                onOpenExpense={() => setExpenseFormOpen(true)}
+            />
 
-                    {/* Desktop action buttons */}
-                    <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                        <Chip
-                            icon={<JournalIcon sx={{ color: 'primary.main !important' }} />}
-                            label="Journal"
-                            onClick={() => setJournalFormOpen(true)}
-                            sx={{
-                                bgcolor: 'white',
-                                color: 'primary.main',
-                                fontWeight: 600,
-                                '&:hover': { bgcolor: 'grey.100' },
-                            }}
-                        />
-                        <Chip
-                            icon={<ExpenseIcon sx={{ color: 'white !important' }} />}
-                            label="Dépense"
-                            onClick={() => setExpenseFormOpen(true)}
-                            variant="outlined"
-                            sx={{
-                                borderColor: 'rgba(255,255,255,0.5)',
-                                color: 'white',
-                                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-                            }}
-                        />
-                    </Stack>
-                </Box>
-
-                {/* Title */}
-                <Typography
-                    variant={isMobile ? 'h5' : 'h4'}
-                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
-                >
-                    {trip.country}
-                </Typography>
-                {trip.city && (
-                    <Typography
-                        variant={isMobile ? 'body1' : 'h6'}
-                        sx={{ opacity: 0.9, fontWeight: 400 }}
-                    >
-                        {trip.city}
-                    </Typography>
-                )}
-
-                {/* Stats chips */}
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.75,
-                        mt: 1.5,
-                        flexWrap: 'wrap',
-                        '& .MuiChip-root': {
-                            height: 28,
-                            '& .MuiChip-label': { px: 1, fontSize: '0.8rem' },
-                            '& .MuiChip-icon': { fontSize: 16 },
-                        },
-                    }}
-                >
-                    <Chip
-                        icon={<CalendarIcon />}
-                        label={formatDateRange(trip.start_date, trip.end_date)}
-                        size="small"
-                        sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
-                    />
-                    {photoCount > 0 && (
-                        <Chip
-                            icon={<PhotoIcon />}
-                            label={photoCount}
-                            size="small"
-                            sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
-                        />
-                    )}
-                    {videoCount > 0 && (
-                        <Chip
-                            icon={<VideoIcon />}
-                            label={videoCount}
-                            size="small"
-                            sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
-                        />
-                    )}
-                </Box>
-            </Box>
-
-            {/* Tabs Content */}
             <TripTabs
                 trip={trip}
                 journalEntries={entries}
@@ -290,7 +212,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                 onRefresh={loadData}
             />
 
-            {/* Journal Form Dialog */}
             <JournalForm
                 open={journalFormOpen}
                 onClose={() => setJournalFormOpen(false)}
@@ -299,7 +220,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                 tripName={tripName}
             />
 
-            {/* Expense Form Dialog */}
             <ExpenseForm
                 open={expenseFormOpen}
                 onClose={() => setExpenseFormOpen(false)}
@@ -308,7 +228,7 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                 tripName={tripName}
             />
 
-            {/* Speed Dial for mobile */}
+            {/* Speed Dial mobile */}
             <SpeedDial
                 ariaLabel="Actions"
                 sx={{
@@ -316,10 +236,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                     bottom: 20,
                     right: 20,
                     display: { xs: 'flex', sm: 'none' },
-                    '& .MuiSpeedDial-fab': {
-                        width: 56,
-                        height: 56,
-                    },
                 }}
                 icon={<SpeedDialIcon />}
                 open={speedDialOpen}

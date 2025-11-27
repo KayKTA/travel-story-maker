@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { DM_Sans } from 'next/font/google';
 import Providers from './providers';
 import AppLayout from '@/components/layout/AppLayout';
 import './globals.css';
 
-const inter = Inter({
+const dmSans = DM_Sans({
     subsets: ['latin'],
     display: 'swap',
-    variable: '--font-inter',
+    variable: '--font-dm-sans',
+    weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
     width: 'device-width',
     initialScale: 1,
-    themeColor: '#0F766E',
+    themeColor: '#F5B82E',
 };
 
 export default function RootLayout({
@@ -38,7 +39,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="fr" className={inter.variable}>
+        <html lang="fr" className={dmSans.variable}>
             <body>
                 <Providers>
                     <AppLayout>

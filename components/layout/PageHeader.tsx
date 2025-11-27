@@ -1,8 +1,8 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Box, Typography, Breadcrumbs, Button, Skeleton } from '@mui/material';
-import { NavigateNext as NavigateNextIcon } from '@mui/icons-material';
+import { Box, Typography, Breadcrumbs, Button, Skeleton, IconButton } from '@mui/material';
+import { NavigateNext as NavigateNextIcon, ArrowBack as BackIcon } from '@mui/icons-material';
 import Link from 'next/link';
 
 interface BreadcrumbItem {
@@ -14,6 +14,7 @@ interface PageHeaderProps {
     title: string;
     subtitle?: string;
     breadcrumbs?: BreadcrumbItem[];
+    backHref?: string;
     action?: {
         label: string;
         icon?: ReactNode;
@@ -34,6 +35,7 @@ export default function PageHeader({
     title,
     subtitle,
     breadcrumbs,
+    backHref,
     action,
     secondaryAction,
     loading,
@@ -44,15 +46,32 @@ export default function PageHeader({
             sx={{
                 px: { xs: 2, sm: 3, md: 4 },
                 py: { xs: 2, sm: 3 },
-                borderBottom: 1,
-                borderColor: 'divider',
-                bgcolor: 'background.paper',
+                bgcolor: '#1A1A1A',
+                color: '#F5B82E',
             }}
         >
+            {/* Back button */}
+            {backHref && (
+                <IconButton
+                    component={Link}
+                    href={backHref}
+                    size="small"
+                    sx={{
+                        mb: 1,
+                        ml: -1,
+                        color: '#F5B82E',
+                        bgcolor: 'rgba(245, 184, 46, 0.1)',
+                        '&:hover': { bgcolor: 'rgba(245, 184, 46, 0.2)' },
+                    }}
+                >
+                    <BackIcon />
+                </IconButton>
+            )}
+
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
                 <Breadcrumbs
-                    separator={<NavigateNextIcon fontSize="small" />}
+                    separator={<NavigateNextIcon fontSize="small" sx={{ color: 'rgba(245, 184, 46, 0.5)' }} />}
                     sx={{ mb: 1.5 }}
                 >
                     {breadcrumbs.map((item, index) => {
@@ -62,9 +81,9 @@ export default function PageHeader({
                             return (
                                 <Typography
                                     key={index}
-                                    color={isLast ? 'text.primary' : 'text.secondary'}
+                                    color={isLast ? '#F5B82E' : 'rgba(245, 184, 46, 0.7)'}
                                     variant="body2"
-                                    sx={{ fontWeight: isLast ? 500 : 400 }}
+                                    sx={{ fontWeight: isLast ? 700 : 500 }}
                                 >
                                     {item.label}
                                 </Typography>
@@ -79,11 +98,11 @@ export default function PageHeader({
                             >
                                 <Typography
                                     variant="body2"
-                                    color="text.secondary"
                                     sx={{
+                                        color: 'rgba(245, 184, 46, 0.7)',
+                                        fontWeight: 500,
                                         '&:hover': {
-                                            color: 'primary.main',
-                                            textDecoration: 'underline',
+                                            color: '#F5B82E',
                                         },
                                     }}
                                 >
@@ -108,23 +127,22 @@ export default function PageHeader({
                 <Box>
                     {loading ? (
                         <>
-                            <Skeleton variant="text" width={250} height={40} />
-                            {subtitle && <Skeleton variant="text" width={180} height={24} />}
+                            <Skeleton variant="text" width={250} height={40} sx={{ bgcolor: 'rgba(245, 184, 46, 0.1)' }} />
+                            {subtitle && <Skeleton variant="text" width={180} height={24} sx={{ bgcolor: 'rgba(245, 184, 46, 0.1)' }} />}
                         </>
                     ) : (
                         <>
                             <Typography
                                 variant="h4"
                                 component="h1"
-                                sx={{ fontWeight: 700, color: 'text.primary' }}
+                                sx={{ fontWeight: 800, color: '#F5B82E' }}
                             >
                                 {title}
                             </Typography>
                             {subtitle && (
                                 <Typography
                                     variant="body1"
-                                    color="text.secondary"
-                                    sx={{ mt: 0.5 }}
+                                    sx={{ mt: 0.5, color: 'rgba(245, 184, 46, 0.7)' }}
                                 >
                                     {subtitle}
                                 </Typography>
@@ -141,6 +159,17 @@ export default function PageHeader({
                                 variant="outlined"
                                 startIcon={secondaryAction.icon}
                                 onClick={secondaryAction.onClick}
+                                sx={{
+                                    borderColor: '#F5B82E',
+                                    color: '#F5B82E',
+                                    borderWidth: 2,
+                                    fontWeight: 700,
+                                    '&:hover': {
+                                        borderColor: '#F5B82E',
+                                        bgcolor: 'rgba(245, 184, 46, 0.1)',
+                                        borderWidth: 2,
+                                    },
+                                }}
                                 {...(secondaryAction.href && {
                                     component: Link,
                                     href: secondaryAction.href,
@@ -154,6 +183,12 @@ export default function PageHeader({
                                 variant="contained"
                                 startIcon={action.icon}
                                 onClick={action.onClick}
+                                sx={{
+                                    bgcolor: '#F5B82E',
+                                    color: '#1A1A1A',
+                                    fontWeight: 700,
+                                    '&:hover': { bgcolor: '#FFD466' },
+                                }}
                                 {...(action.href && {
                                     component: Link,
                                     href: action.href,

@@ -210,7 +210,7 @@ export default function ExpenseForm({
 
                         {/* Amount & Currency - Most important first */}
                         <Grid container spacing={2}>
-                            <Grid size={{ xs: 8 }}>
+                            <Grid size={{ xs: 12, sm: 8 }}>
                                 <TextField
                                     label="Montant"
                                     type="number"
@@ -230,7 +230,7 @@ export default function ExpenseForm({
                                     }}
                                 />
                             </Grid>
-                            <Grid size={{ xs: 4 }}>
+                            <Grid size={{ xs: 12, sm: 4 }}>
                                 <FormControl fullWidth>
                                     <InputLabel>Devise</InputLabel>
                                     <Select

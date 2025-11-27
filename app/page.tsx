@@ -124,7 +124,7 @@ async function RecentTrips() {
                         Commencez par créer votre premier voyage !
                     </Typography>
                     <Button
-                        component={Link}
+                        // component={Link}
                         href="/trips?new=true"
                         variant="contained"
                         startIcon={<AddIcon />}
@@ -147,7 +147,7 @@ async function RecentTrips() {
                             '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
                         }}
                     >
-                        <CardActionArea component={Link} href={`/trips/${trip.id}`} sx={{ height: '100%' }}>
+                        <CardActionArea  href={`/trips/${trip.id}`} sx={{ height: '100%' }}>
                             <CardContent sx={{ p: 2.5 }}>
                                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                                     {trip.country}
@@ -236,13 +236,25 @@ export default function HomePage() {
                 <DashboardHeader />
             </Suspense>
 
-            <Container maxWidth="lg" sx={{ py: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                    gap: 1
+                }}>
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: { xs: '1.25rem', sm: '1.5rem' }
+                        }}
+                    >
                         Mes Voyages
                     </Typography>
                     <Button
-                        component={Link}
+                        // component={Link}
                         href="/trips"
                         variant="text"
                         size="small"

@@ -108,7 +108,7 @@ export default function MediaGallery({
                 }}
             >
                 {/* Stats & filters */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                     <ToggleButtonGroup
                         value={filterType}
                         exclusive
@@ -116,21 +116,23 @@ export default function MediaGallery({
                         size="small"
                     >
                         <ToggleButton value="all">
-                            Tous ({media.length})
+                            <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Tous </Box>({media.length})
                         </ToggleButton>
                         <ToggleButton value="photo">
-                            <PhotoIcon sx={{ mr: 0.5 }} fontSize="small" />
+                            <PhotoIcon sx={{ mr: { xs: 0, sm: 0.5 } }} fontSize="small" />
+                            <Box sx={{ display: { xs: 'none', sm: 'inline' } }}> </Box>
                             {photos.length}
                         </ToggleButton>
                         <ToggleButton value="video">
-                            <VideoIcon sx={{ mr: 0.5 }} fontSize="small" />
+                            <VideoIcon sx={{ mr: { xs: 0, sm: 0.5 } }} fontSize="small" />
+                            <Box sx={{ display: { xs: 'none', sm: 'inline' } }}> </Box>
                             {videos.length}
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
 
                 {/* View mode & actions */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <ToggleButtonGroup
                         value={viewMode}
                         exclusive
@@ -147,10 +149,14 @@ export default function MediaGallery({
 
                     <Button
                         variant="contained"
-                        startIcon={<AddIcon />}
+                        startIcon={<AddIcon sx={{ display: { xs: 'none', sm: 'block' } }} />}
                         onClick={() => setUploadOpen(true)}
+                        sx={{ minWidth: { xs: 'auto', sm: 'auto' } }}
                     >
-                        Ajouter
+                        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                            Ajouter
+                        </Box>
+                        <AddIcon sx={{ display: { xs: 'block', sm: 'none' } }} />
                     </Button>
                 </Box>
             </Box>

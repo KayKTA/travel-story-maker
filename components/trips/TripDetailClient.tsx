@@ -4,21 +4,21 @@ import { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
-    Button,
+    IconButton,
     Chip,
     Skeleton,
     Stack,
-    Fab,
     SpeedDial,
     SpeedDialAction,
     SpeedDialIcon,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
 import {
     CalendarToday as CalendarIcon,
     PhotoCamera as PhotoIcon,
     Videocam as VideoIcon,
-    ChevronLeft as BackIcon,
-    Add as AddIcon,
+    ArrowBack as BackIcon,
     Book as JournalIcon,
     Receipt as ExpenseIcon,
 } from '@mui/icons-material';
@@ -39,6 +39,9 @@ interface TripDetailClientProps {
 }
 
 export default function TripDetailClient({ tripId }: TripDetailClientProps) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     const [trip, setTrip] = useState<Trip | null>(null);
     const [entries, setEntries] = useState<JournalEntryWithMedia[]>([]);
     const [media, setMedia] = useState<MediaAsset[]>([]);
@@ -52,7 +55,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
     const loadData = async () => {
         const supabase = getSupabaseClient();
 
-        // Load trip
         const { data: tripData } = await supabase
             .from('trips')
             .select('*')
@@ -61,14 +63,12 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
         setTrip(tripData);
 
-        // Load journal entries
         const { data: entriesData } = await supabase
             .from('journal_entries')
             .select('*')
             .eq('trip_id', tripId)
             .order('entry_date', { ascending: false });
 
-        // Load all media for this trip
         const { data: mediaData } = await supabase
             .from('media_assets')
             .select('*')
@@ -77,7 +77,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
         setMedia(mediaData || []);
 
-        // Load media for each entry
         const entriesWithMedia: JournalEntryWithMedia[] = (entriesData || []).map((entry) => ({
             ...entry,
             media_assets: (mediaData || []).filter((m) => m.journal_entry_id === entry.id),
@@ -85,7 +84,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
         setEntries(entriesWithMedia);
 
-        // Load expenses
         const { data: expensesData } = await supabase
             .from('expenses')
             .select('*')
@@ -94,7 +92,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
         setExpenses(expensesData || []);
 
-        // Load stories
         const { data: storiesData } = await supabase
             .from('stories')
             .select('*')
@@ -120,15 +117,20 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
     if (loading) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Skeleton variant="text" width={200} height={40} />
-                <Skeleton variant="text" width={150} height={24} sx={{ mb: 3 }} />
-                <Skeleton variant="rounded" height={50} sx={{ mb: 2 }} />
-                <Stack spacing={2}>
-                    {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} variant="rounded" height={200} />
-                    ))}
-                </Stack>
+            <Box>
+                <Box sx={{ bgcolor: 'primary.main', p: 2, pb: 3 }}>
+                    <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+                    <Skeleton variant="text" width={150} height={36} sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.2)' }} />
+                    <Skeleton variant="text" width={100} height={24} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
+                </Box>
+                <Box sx={{ p: 2 }}>
+                    <Skeleton variant="rounded" height={48} sx={{ mb: 2 }} />
+                    <Stack spacing={2}>
+                        {[1, 2, 3].map((i) => (
+                            <Skeleton key={i} variant="rounded" height={120} />
+                        ))}
+                    </Stack>
+                </Box>
             </Box>
         );
     }
@@ -137,14 +139,13 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
         return (
             <Box sx={{ p: 3, textAlign: 'center' }}>
                 <Typography>Voyage non trouvé</Typography>
-                <Button component={Link} href="/trips" sx={{ mt: 2 }}>
-                    Retour aux voyages
-                </Button>
+                <IconButton component={Link} href="/trips" sx={{ mt: 2 }}>
+                    <BackIcon />
+                </IconButton>
             </Box>
         );
     }
 
-    // Calculate stats
     const photoCount = media.filter((m) => m.media_type === 'photo').length;
     const videoCount = media.filter((m) => m.media_type === 'video').length;
     const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -165,44 +166,41 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
     ];
 
     return (
-        <Box sx={{ pb: 4 }}>
-            {/* Header */}
+        <Box sx={{ pb: { xs: 10, sm: 4 }, minHeight: '100vh', bgcolor: 'grey.50' }}>
+            {/* Compact Mobile Header */}
             <Box
                 sx={{
                     bgcolor: 'primary.main',
                     color: 'white',
-                    p: 3,
-                    pb: 4,
-                    borderRadius: { xs: 0, sm: '0 0 24px 24px' },
-                    position: 'relative',
+                    pt: { xs: 1, sm: 2 },
+                    pb: { xs: 2, sm: 3 },
+                    px: { xs: 2, sm: 3 },
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 100,
                 }}
             >
-                <Button
-                    component={Link}
-                    href="/trips"
-                    startIcon={<BackIcon />}
-                    sx={{ color: 'white', mb: 2, ml: -1 }}
-                >
-                    Voyages
-                </Button>
+                {/* Top row: Back + Actions */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <IconButton
+                        component={Link}
+                        href="/trips"
+                        sx={{
+                            color: 'white',
+                            ml: -1,
+                            bgcolor: 'rgba(255,255,255,0.1)',
+                            '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                        }}
+                        size="small"
+                    >
+                        <BackIcon />
+                    </IconButton>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box>
-                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                            {trip.country}
-                        </Typography>
-                        {trip.city && (
-                            <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400 }}>
-                                {trip.city}
-                            </Typography>
-                        )}
-                    </Box>
-
-                    {/* Action Buttons in Header */}
+                    {/* Desktop action buttons */}
                     <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
+                        <Chip
+                            icon={<JournalIcon sx={{ color: 'primary.main !important' }} />}
+                            label="Journal"
                             onClick={() => setJournalFormOpen(true)}
                             sx={{
                                 bgcolor: 'white',
@@ -210,26 +208,52 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                 fontWeight: 600,
                                 '&:hover': { bgcolor: 'grey.100' },
                             }}
-                        >
-                            Journal
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            startIcon={<ExpenseIcon />}
+                        />
+                        <Chip
+                            icon={<ExpenseIcon sx={{ color: 'white !important' }} />}
+                            label="Dépense"
                             onClick={() => setExpenseFormOpen(true)}
+                            variant="outlined"
                             sx={{
-                                borderColor: 'white',
+                                borderColor: 'rgba(255,255,255,0.5)',
                                 color: 'white',
-                                fontWeight: 600,
-                                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', borderColor: 'white' },
+                                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
                             }}
-                        >
-                            Dépense
-                        </Button>
+                        />
                     </Stack>
                 </Box>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, flexWrap: 'wrap' }}>
+                {/* Title */}
+                <Typography
+                    variant={isMobile ? 'h5' : 'h4'}
+                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
+                >
+                    {trip.country}
+                </Typography>
+                {trip.city && (
+                    <Typography
+                        variant={isMobile ? 'body1' : 'h6'}
+                        sx={{ opacity: 0.9, fontWeight: 400 }}
+                    >
+                        {trip.city}
+                    </Typography>
+                )}
+
+                {/* Stats chips */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        mt: 1.5,
+                        flexWrap: 'wrap',
+                        '& .MuiChip-root': {
+                            height: 28,
+                            '& .MuiChip-label': { px: 1, fontSize: '0.8rem' },
+                            '& .MuiChip-icon': { fontSize: 16 },
+                        },
+                    }}
+                >
                     <Chip
                         icon={<CalendarIcon />}
                         label={formatDateRange(trip.start_date, trip.end_date)}
@@ -289,9 +313,13 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                 ariaLabel="Actions"
                 sx={{
                     position: 'fixed',
-                    bottom: 24,
-                    right: 24,
+                    bottom: 20,
+                    right: 20,
                     display: { xs: 'flex', sm: 'none' },
+                    '& .MuiSpeedDial-fab': {
+                        width: 56,
+                        height: 56,
+                    },
                 }}
                 icon={<SpeedDialIcon />}
                 open={speedDialOpen}

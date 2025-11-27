@@ -16,6 +16,8 @@ import {
     Box,
     Alert,
     CircularProgress,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -50,6 +52,9 @@ export default function TripForm({
     initialData,
     isEditing = false,
 }: TripFormProps) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     const [formData, setFormData] = useState<TripFormData>(emptyFormData);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<string[]>([]);
@@ -111,6 +116,7 @@ export default function TripForm({
         <Dialog
             open={open}
             onClose={handleClose}
+            fullScreen={isMobile}
             maxWidth="sm"
             fullWidth
             // Disable portal for nested popovers to work correctly

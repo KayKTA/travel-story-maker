@@ -1,8 +1,8 @@
 'use client';
 
-import { Box, Drawer, IconButton, Typography } from '@mui/material';
+import { Box, Drawer, IconButton, Typography, Chip } from '@mui/material';
 import { ExpandMore as ExpandIcon } from '@mui/icons-material';
-import { tokens } from '@/styles';
+import { tokens, flexBetween } from '@/styles';
 import { DrawerHandle } from '@/components/common';
 import Timeline from './Timeline';
 import type { JournalEntryWithMedia } from '@/types';
@@ -31,10 +31,10 @@ export default function TimelineDrawer({
             onClose={onClose}
             PaperProps={{
                 sx: {
-                    height: '70vh',
-                    borderTopLeftRadius: tokens.components.drawer.borderRadius,
-                    borderTopRightRadius: tokens.components.drawer.borderRadius,
-                    bgcolor: 'background.default',
+                    height: '75vh',
+                    borderTopLeftRadius: 16,
+                    borderTopRightRadius: 16,
+                    bgcolor: 'background.paper',
                 },
             }}
         >
@@ -43,17 +43,22 @@ export default function TimelineDrawer({
             {/* Header */}
             <Box
                 sx={{
-                    px: 2,
-                    pb: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    px: 2.5,
+                    pb: 2,
+                    ...flexBetween,
+                    borderBottom: 1,
+                    borderColor: 'divider',
                 }}
             >
-                <Typography variant="h6" sx={{ fontWeight: tokens.fontWeights.bold }}>
-                    Itinéraire
-                </Typography>
-                <IconButton onClick={onClose}>
+                <Box>
+                    <Typography variant="h6" sx={{ fontWeight: tokens.fontWeights.bold }}>
+                        Étapes
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        {entries.length} lieu{entries.length > 1 ? 'x' : ''} visité{entries.length > 1 ? 's' : ''}
+                    </Typography>
+                </Box>
+                <IconButton onClick={onClose} sx={{ bgcolor: 'action.hover' }}>
                     <ExpandIcon />
                 </IconButton>
             </Box>

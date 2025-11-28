@@ -132,7 +132,7 @@ export default function MediaGallery({
                 </Box>
 
                 {/* View mode & actions */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <ToggleButtonGroup
                         value={viewMode}
                         exclusive
@@ -158,7 +158,7 @@ export default function MediaGallery({
                         </Box>
                         <AddIcon sx={{ display: { xs: 'block', sm: 'none' } }} />
                     </Button>
-                </Box>
+                </Box> */}
             </Box>
 
             {/* Gallery view */}

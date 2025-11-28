@@ -1,186 +1,205 @@
-// ============================================
-// Theme Tokens - Design System Constants
-// Use these tokens instead of hardcoded values
-// ============================================
+// =============================================================================
+// DESIGN TOKENS - Minimalist Yellow Theme
+// =============================================================================
 
+/**
+ * Centralized design tokens for consistent styling across the app.
+ * Use these instead of hardcoded values.
+ */
 export const tokens = {
-    // Colors - Primary palette
+    // ---------------------------------------------------------------------------
+    // COLORS
+    // ---------------------------------------------------------------------------
     colors: {
         primary: {
-            main: '#1A1A1A',
-            light: '#2D2620',
-            dark: '#000000',
-            contrast: '#F5B82E',
+            main: '#FACC15',
+            light: '#FDE047',
+            dark: '#EAB308',
+            contrast: '#18181B',
         },
         secondary: {
-            main: '#D64545',
-            light: '#E86B6B',
-            dark: '#B33030',
+            main: '#64748B',
+            light: '#94A3B8',
+            dark: '#475569',
             contrast: '#FFFFFF',
         },
         background: {
-            default: '#F5B82E',
-            paper: '#FFFDF5',
+            default: '#FAFAFA',
+            paper: '#FFFFFF',
+            subtle: '#F4F4F5',
         },
         text: {
-            primary: '#1A1A1A',
-            secondary: '#4A3E23',
-            disabled: '#8C7642',
+            primary: '#18181B',
+            secondary: '#71717A',
+            disabled: '#A1A1AA',
         },
-        success: {
-            main: '#2D5A3D',
-            light: '#4A7C5A',
-        },
-        warning: {
-            main: '#F5B82E',
-            light: '#FFD466',
-        },
-        error: {
-            main: '#D64545',
-            light: '#E86B6B',
-        },
+        success: '#22C55E',
+        warning: '#F59E0B',
+        error: '#EF4444',
+        info: '#3B82F6',
+        border: '#E4E4E7',
     },
 
-    // Spacing - in MUI theme units (8px base)
+    // ---------------------------------------------------------------------------
+    // SPACING (in MUI units - 1 unit = 4px)
+    // ---------------------------------------------------------------------------
     spacing: {
-        xs: 0.5,   // 4px
-        sm: 1,     // 8px
-        md: 2,     // 16px
-        lg: 3,     // 24px
-        xl: 4,     // 32px
-        xxl: 6,    // 48px
+        xs: 1,      // 4px
+        sm: 2,      // 8px
+        md: 4,      // 16px
+        lg: 6,      // 24px
+        xl: 8,      // 32px
+        xxl: 12,    // 48px
     },
 
-    // Border radius
+    // ---------------------------------------------------------------------------
+    // BORDER RADIUS (in MUI units - 1 unit = 4px)
+    // ---------------------------------------------------------------------------
     radius: {
-        sm: 1,     // 8px
-        md: 2,     // 16px
-        lg: 3,     // 24px
-        xl: 4,     // 32px
-        pill: 50,  // Pill shape
+        xs: 1,      // 4px
+        sm: 2,      // 8px
+        md: 3,      // 12px
+        lg: 4,      // 16px
+        xl: 6,      // 24px
+        pill: 50,   // Full rounded
         circle: '50%',
     },
 
-    // Transitions
+    // ---------------------------------------------------------------------------
+    // TRANSITIONS
+    // ---------------------------------------------------------------------------
     transitions: {
-        fast: 'all 0.15s ease',
-        normal: 'all 0.2s ease',
-        slow: 'all 0.3s ease',
+        fast: '0.15s ease',
+        normal: '0.2s ease',
+        slow: '0.3s ease',
     },
 
-    // Z-indexes
+    // ---------------------------------------------------------------------------
+    // Z-INDEX
+    // ---------------------------------------------------------------------------
     zIndex: {
         drawer: 1200,
         modal: 1300,
-        snackbar: 1400,
         tooltip: 1500,
-        speedDial: 1050,
         header: 10,
         tabs: 5,
+        fab: 1050,
     },
 
-    // Breakpoint values (for non-MUI usage)
-    breakpoints: {
-        xs: 0,
-        sm: 600,
-        md: 900,
-        lg: 1200,
-        xl: 1536,
-    },
-
-    // Typography variants mapping
+    // ---------------------------------------------------------------------------
+    // FONT WEIGHTS
+    // ---------------------------------------------------------------------------
     fontWeights: {
         regular: 400,
         medium: 500,
         semibold: 600,
-        bold: 700,
-        extrabold: 800,
+        bold: 600,      // Using 600 for cleaner look
     },
 
-    // Icon sizes
+    // ---------------------------------------------------------------------------
+    // ICON SIZES
+    // ---------------------------------------------------------------------------
     iconSizes: {
-        sm: 16,
+        xs: 14,
+        sm: 18,
         md: 24,
         lg: 32,
         xl: 48,
     },
 
-    // Component-specific tokens
+    // ---------------------------------------------------------------------------
+    // COMPONENT TOKENS
+    // ---------------------------------------------------------------------------
     components: {
         card: {
-            borderRadius: 24,
-            padding: 24,
+            borderRadius: 12,
+            padding: 20,
+            border: '1px solid #E4E4E7',
         },
         button: {
-            borderRadius: 50,
-            paddingX: 28,
-            paddingY: 12,
+            borderRadius: 8,
+            paddingX: 16,
+            paddingY: 8,
         },
         input: {
-            borderRadius: 14,
-            borderWidth: 2,
+            borderRadius: 8,
+            height: 44,
         },
         chip: {
-            borderRadius: 50,
+            borderRadius: 6,
             height: 28,
         },
         header: {
-            height: { mobile: 64, desktop: 80 },
+            height: 64,
+            mobileHeight: 56,
         },
         drawer: {
-            borderRadius: 24,
+            borderRadius: 16,
             handleWidth: 40,
-            handleHeight: 4,
         },
         timeline: {
-            dotSize: { default: 16, selected: 20 },
-            lineWidth: 3,
+            lineWidth: 2,
+            dotSize: {
+                default: 28,
+                selected: 32,
+            },
         },
         thumbnail: {
-            size: { sm: 40, md: 48, lg: 56 },
+            sizes: {
+                sm: 36,
+                md: 44,
+                lg: 52,
+            },
         },
     },
-} as const;
+};
 
-// Mood colors mapping
+// ---------------------------------------------------------------------------
+// MOOD COLORS (for journal entries)
+// ---------------------------------------------------------------------------
 export const moodColors: Record<string, string> = {
-    amazing: tokens.colors.success.main,
-    great: tokens.colors.success.light,
-    good: tokens.colors.primary.main,
-    mixed: '#B89F5C',
-    challenging: '#D97B3D',
-    difficult: tokens.colors.error.main,
-    excited: tokens.colors.error.main,
-    happy: tokens.colors.warning.main,
-    tired: '#6B5A32',
-    frustrated: '#D97B3D',
-    sad: tokens.colors.text.secondary,
-    adventurous: tokens.colors.primary.main,
-    inspired: '#8B4570',
-    chill: tokens.colors.success.main,
-    neutral: '#6B5A32',
-    in_love: tokens.colors.error.main,
-    underwhelmed: '#8C7642',
+    amazing: '#22C55E',
+    happy: '#4ADE80',
+    good: '#86EFAC',
+    okay: '#FDE047',
+    neutral: '#A1A1AA',
+    tired: '#94A3B8',
+    sad: '#64748B',
+    frustrated: '#F97316',
+    stressed: '#EF4444',
+    sick: '#F87171',
+    adventurous: '#3B82F6',
 };
 
-// Category colors for expenses
+// ---------------------------------------------------------------------------
+// CATEGORY COLORS (for expenses)
+// ---------------------------------------------------------------------------
 export const categoryColors: Record<string, string> = {
-    transport: tokens.colors.primary.main,
-    logement: '#8B4570',
-    food: '#D97B3D',
-    activite: tokens.colors.success.main,
-    shopping: tokens.colors.error.main,
-    autre: '#6B5A32',
+    transport: '#3B82F6',
+    hebergement: '#8B5CF6',
+    nourriture: '#22C55E',
+    activite: '#F59E0B',
+    shopping: '#EC4899',
+    autre: '#64748B',
 };
 
-// Helper to get alpha color
-export const alpha = (color: string, opacity: number): string => {
-    // Convert hex to rgba
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
+// ---------------------------------------------------------------------------
+// HELPER FUNCTIONS
+// ---------------------------------------------------------------------------
 
-export type Tokens = typeof tokens;
+/**
+ * Create a color with alpha transparency
+ */
+export function alpha(color: string, opacity: number): string {
+    // For hex colors, convert to rgba
+    if (color.startsWith('#')) {
+        const hex = color.slice(1);
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return color;
+}
+
+export default tokens;

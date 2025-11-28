@@ -1,87 +1,42 @@
+// =============================================================================
+// STYLE UTILITIES - Reusable SxProps patterns
+// =============================================================================
+
 import type { SxProps, Theme } from '@mui/material';
 import { tokens } from './tokens';
 
-// ============================================
-// Theme-aware style utilities
-// Reusable sx prop generators
-// ============================================
+// ---------------------------------------------------------------------------
+// LAYOUT UTILITIES
+// ---------------------------------------------------------------------------
 
-// Common layout patterns
+/** Flexbox center alignment */
 export const flexCenter: SxProps<Theme> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
 };
 
+/** Flexbox space-between */
 export const flexBetween: SxProps<Theme> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
 };
 
+/** Flexbox start alignment */
 export const flexStart: SxProps<Theme> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-start',
 };
 
+/** Flexbox column */
 export const flexColumn: SxProps<Theme> = {
     display: 'flex',
     flexDirection: 'column',
 };
 
-// Text truncation
-export const textTruncate = (lines: number = 1): SxProps<Theme> => ({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    ...(lines === 1
-        ? { whiteSpace: 'nowrap' }
-        : {
-            display: '-webkit-box',
-            WebkitLineClamp: lines,
-            WebkitBoxOrient: 'vertical',
-        }),
-});
-
-// Scrollable container
-export const scrollable: SxProps<Theme> = {
-    overflowY: 'auto',
-    '&::-webkit-scrollbar': { width: 6 },
-    '&::-webkit-scrollbar-thumb': {
-        bgcolor: (theme) => theme.palette.action.hover,
-        borderRadius: tokens.radius.sm,
-    },
-};
-
-// Interactive card styles
-export const interactiveCard = (isSelected?: boolean): SxProps<Theme> => ({
-    transition: tokens.transitions.normal,
-    cursor: 'pointer',
-    transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-    boxShadow: isSelected ? 4 : 1,
-    border: 2,
-    borderColor: isSelected ? 'warning.main' : 'transparent',
-    '&:hover': {
-        boxShadow: 3,
-        transform: 'translateY(-2px)',
-    },
-});
-
-// Sticky header
-export const stickyHeader = (top: number | object = 0): SxProps<Theme> => ({
-    position: 'sticky',
-    top,
-    zIndex: tokens.zIndex.header,
-    bgcolor: 'background.paper',
-});
-
-// Dark header (for page headers)
-export const darkHeader: SxProps<Theme> = {
-    bgcolor: 'primary.main',
-    color: 'primary.contrastText',
-};
-
-// Absolute positioning helpers
+/** Absolute fill parent */
 export const absoluteFill: SxProps<Theme> = {
     position: 'absolute',
     top: 0,
@@ -90,119 +45,266 @@ export const absoluteFill: SxProps<Theme> = {
     bottom: 0,
 };
 
+/** Absolute top right corner */
 export const absoluteTopRight: SxProps<Theme> = {
     position: 'absolute',
     top: 12,
     right: 12,
 };
 
-export const absoluteBottomLeft: SxProps<Theme> = {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
+// ---------------------------------------------------------------------------
+// TEXT UTILITIES
+// ---------------------------------------------------------------------------
+
+/**
+ * Truncate text with ellipsis after N lines
+ */
+export const textTruncate = (lines: number = 1): SxProps<Theme> => ({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: lines,
+    WebkitBoxOrient: 'vertical',
+});
+
+/** Single line truncate */
+export const textEllipsis: SxProps<Theme> = {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
 };
 
-// Badge styling
-export const badge = (variant: 'primary' | 'secondary' | 'warning' = 'primary'): SxProps<Theme> => {
-    const colors = {
-        primary: { bg: 'primary.main', text: 'primary.contrastText' },
-        secondary: { bg: 'secondary.main', text: 'secondary.contrastText' },
-        warning: { bg: 'warning.main', text: 'primary.main' },
-    };
+// ---------------------------------------------------------------------------
+// SCROLLABLE CONTAINER
+// ---------------------------------------------------------------------------
 
-    return {
-        bgcolor: colors[variant].bg,
-        color: colors[variant].text,
-        fontWeight: tokens.fontWeights.bold,
-        borderRadius: tokens.radius.pill,
-        px: 1.5,
-        py: 0.5,
-    };
+export const scrollable: SxProps<Theme> = {
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    WebkitOverflowScrolling: 'touch',
+    '&::-webkit-scrollbar': {
+        width: 6,
+    },
+    '&::-webkit-scrollbar-thumb': {
+        backgroundColor: 'divider',
+        borderRadius: 3,
+    },
 };
 
-// Chip variants
-export const chipPrimary: SxProps<Theme> = {
+export const hideScrollbar: SxProps<Theme> = {
+    overflow: 'auto',
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
+    '&::-webkit-scrollbar': {
+        display: 'none',
+    },
+};
+
+// ---------------------------------------------------------------------------
+// HEADER STYLES
+// ---------------------------------------------------------------------------
+
+/** Primary header - Yellow background */
+export const primaryHeader: SxProps<Theme> = {
     bgcolor: 'primary.main',
     color: 'primary.contrastText',
-    fontWeight: tokens.fontWeights.bold,
-    '&:hover': { bgcolor: 'primary.light' },
+    position: 'relative',
 };
 
-export const chipSecondary: SxProps<Theme> = {
-    bgcolor: 'secondary.main',
-    color: 'secondary.contrastText',
-    fontWeight: tokens.fontWeights.bold,
-    '&:hover': { bgcolor: 'secondary.light' },
+/** Dark header - For contrast */
+export const darkHeader: SxProps<Theme> = {
+    bgcolor: 'text.primary',
+    color: 'background.paper',
+    position: 'relative',
 };
 
-export const chipOutlined: SxProps<Theme> = {
-    borderWidth: 2,
-    borderColor: 'primary.main',
-    fontWeight: tokens.fontWeights.bold,
-};
+/** Sticky header */
+export const stickyHeader = (top: number = 0): SxProps<Theme> => ({
+    position: 'sticky',
+    top,
+    zIndex: tokens.zIndex.header,
+    bgcolor: 'background.paper',
+    borderBottom: 1,
+    borderColor: 'divider',
+});
 
-// FAB styling
-export const fabPrimary: SxProps<Theme> = {
-    bgcolor: 'primary.main',
-    color: 'primary.contrastText',
-    '&:hover': { bgcolor: 'primary.light' },
-};
+// ---------------------------------------------------------------------------
+// CARD & INTERACTIVE STYLES
+// ---------------------------------------------------------------------------
 
-// Icon button with background
-export const iconButtonFilled = (variant: 'light' | 'dark' = 'light'): SxProps<Theme> => ({
-    bgcolor: variant === 'light'
-        ? (theme) => theme.palette.action.hover
-        : 'primary.main',
-    color: variant === 'light' ? 'text.primary' : 'primary.contrastText',
+/** Interactive card with hover effect */
+export const interactiveCard = (isSelected: boolean = false): SxProps<Theme> => ({
+    cursor: 'pointer',
+    transition: tokens.transitions.fast,
+    borderColor: isSelected ? 'primary.main' : 'divider',
+    bgcolor: isSelected ? 'primary.main' : 'background.paper',
+    color: isSelected ? 'primary.contrastText' : 'text.primary',
     '&:hover': {
-        bgcolor: variant === 'light'
-            ? (theme) => theme.palette.action.selected
-            : 'primary.light',
+        borderColor: isSelected ? 'primary.dark' : 'text.disabled',
+        transform: 'translateY(-1px)',
     },
 });
 
-// Paper overlay gradient
-export const overlayGradient = (direction: 'top' | 'bottom' = 'top'): SxProps<Theme> => ({
-    position: 'absolute',
-    inset: direction === 'top' ? '0 0 auto 0' : 'auto 0 0 0',
-    p: 2,
-    background: (theme) =>
-        `linear-gradient(to ${direction}, ${theme.palette.common.black}00, ${theme.palette.common.black}B3)`,
-});
-
-// Drawer handle
-export const drawerHandle: SxProps<Theme> = {
-    width: tokens.components.drawer.handleWidth,
-    height: tokens.components.drawer.handleHeight,
-    borderRadius: tokens.radius.sm,
-    bgcolor: (theme) => theme.palette.action.disabled,
-    mx: 'auto',
+/** Subtle card - no border, just shadow on hover */
+export const subtleCard: SxProps<Theme> = {
+    border: 'none',
+    bgcolor: 'background.paper',
+    transition: tokens.transitions.fast,
+    '&:hover': {
+        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+    },
 };
 
-// Timeline dot
-export const timelineDot = (color: string, isSelected: boolean): SxProps<Theme> => ({
+// ---------------------------------------------------------------------------
+// BADGE & CHIP STYLES
+// ---------------------------------------------------------------------------
+
+/** Status badge */
+export const badge = (variant: 'primary' | 'secondary' | 'success' | 'error' | 'warning' = 'primary'): SxProps<Theme> => {
+    const colors = {
+        primary: { bg: 'primary.main', color: 'primary.contrastText' },
+        secondary: { bg: 'secondary.main', color: 'secondary.contrastText' },
+        success: { bg: 'success.main', color: 'common.white' },
+        error: { bg: 'error.main', color: 'common.white' },
+        warning: { bg: 'warning.main', color: 'common.white' },
+    };
+    return {
+        bgcolor: colors[variant].bg,
+        color: colors[variant].color,
+        px: 2,
+        py: 0.5,
+        borderRadius: tokens.radius.sm,
+        fontWeight: tokens.fontWeights.medium,
+        fontSize: '0.75rem',
+    };
+};
+
+/** Primary chip - Yellow */
+export const chipPrimary: SxProps<Theme> = {
+    bgcolor: 'primary.main',
+    color: 'primary.contrastText',
+    fontWeight: tokens.fontWeights.medium,
+    '&:hover': {
+        bgcolor: 'primary.dark',
+    },
+};
+
+/** Outlined chip */
+export const chipOutlined: SxProps<Theme> = {
+    bgcolor: 'transparent',
+    border: 1,
+    borderColor: 'divider',
+    color: 'text.primary',
+    fontWeight: tokens.fontWeights.medium,
+};
+
+/** Subtle chip - Light background */
+export const chipSubtle: SxProps<Theme> = {
+    bgcolor: 'action.hover',
+    color: 'text.primary',
+    fontWeight: tokens.fontWeights.medium,
+};
+
+// ---------------------------------------------------------------------------
+// BUTTON STYLES
+// ---------------------------------------------------------------------------
+
+/** FAB primary style */
+export const fabPrimary: SxProps<Theme> = {
+    bgcolor: 'primary.main',
+    color: 'primary.contrastText',
+    '&:hover': {
+        bgcolor: 'primary.dark',
+    },
+};
+
+/** Icon button with background */
+export const iconButtonFilled = (variant: 'primary' | 'subtle' = 'subtle'): SxProps<Theme> => ({
+    bgcolor: variant === 'primary' ? 'primary.main' : 'action.hover',
+    color: variant === 'primary' ? 'primary.contrastText' : 'text.primary',
+    borderRadius: tokens.radius.sm,
+    '&:hover': {
+        bgcolor: variant === 'primary' ? 'primary.dark' : 'action.selected',
+    },
+});
+
+// ---------------------------------------------------------------------------
+// OVERLAY & GRADIENT
+// ---------------------------------------------------------------------------
+
+/** Gradient overlay for images */
+export const overlayGradient = (direction: 'top' | 'bottom' = 'bottom'): SxProps<Theme> => ({
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    [direction === 'bottom' ? 'bottom' : 'top']: 0,
+    height: '50%',
+    background: `linear-gradient(to ${direction}, transparent, rgba(0,0,0,0.6))`,
+    pointerEvents: 'none',
+});
+
+// ---------------------------------------------------------------------------
+// DRAWER & MODAL
+// ---------------------------------------------------------------------------
+
+/** Drawer handle bar */
+export const drawerHandle: SxProps<Theme> = {
+    width: 40,
+    height: 4,
+    backgroundColor: 'divider',
+    borderRadius: 2,
+    mx: 'auto',
+    my: 1.5,
+};
+
+// ---------------------------------------------------------------------------
+// TIMELINE
+// ---------------------------------------------------------------------------
+
+/** Timeline dot style */
+export const timelineDot = (color: string, isSelected: boolean = false): SxProps<Theme> => ({
     width: isSelected ? tokens.components.timeline.dotSize.selected : tokens.components.timeline.dotSize.default,
     height: isSelected ? tokens.components.timeline.dotSize.selected : tokens.components.timeline.dotSize.default,
     borderRadius: tokens.radius.circle,
     bgcolor: color,
-    border: 3,
-    borderStyle: 'solid',
-    borderColor: isSelected ? 'warning.main' : 'background.paper',
-    boxShadow: isSelected ? (theme) => `0 0 0 3px ${theme.palette.warning.light}40` : 'none',
-    transition: tokens.transitions.normal,
-    ...flexCenter,
-    zIndex: 1,
+    color: '#FFFFFF',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: tokens.fontWeights.semibold,
+    fontSize: isSelected ? '0.875rem' : '0.75rem',
+    transition: tokens.transitions.fast,
+    border: isSelected ? '3px solid' : '2px solid',
+    borderColor: 'background.paper',
+    boxShadow: isSelected ? '0 0 0 2px' : 'none',
 });
 
-// Responsive value helper
-export const responsive = <T>(xs: T, sm?: T, md?: T, lg?: T): { xs: T; sm?: T; md?: T; lg?: T } => ({
+// ---------------------------------------------------------------------------
+// RESPONSIVE HELPERS
+// ---------------------------------------------------------------------------
+
+/**
+ * Create responsive values
+ */
+export const responsive = (
+    xs: string | number,
+    sm?: string | number,
+    md?: string | number,
+    lg?: string | number
+) => ({
     xs,
-    ...(sm !== undefined && { sm }),
-    ...(md !== undefined && { md }),
-    ...(lg !== undefined && { lg }),
+    sm: sm ?? xs,
+    md: md ?? sm ?? xs,
+    lg: lg ?? md ?? sm ?? xs,
 });
 
-// Merge sx props helper
+// ---------------------------------------------------------------------------
+// MERGE UTILITY
+// ---------------------------------------------------------------------------
+
+/**
+ * Merge multiple sx props
+ */
 export const mergeSx = (...styles: (SxProps<Theme> | undefined)[]): SxProps<Theme> => {
     return styles.filter(Boolean).reduce((acc, style) => ({ ...acc, ...style }), {}) as SxProps<Theme>;
 };

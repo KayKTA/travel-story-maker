@@ -2,15 +2,13 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import type { Trip, JournalEntry, MediaAsset, Expense, Story, JournalEntryWithMedia } from '@/types';
-
-interface TripData {
-    trip: Trip | null;
-    entries: JournalEntryWithMedia[];
-    media: MediaAsset[];
-    expenses: Expense[];
-    stories: Story[];
-}
+import type {
+    Trip,
+    JournalEntryWithMedia,
+    MediaAsset,
+    Expense,
+    Story,
+} from '@/types';
 
 interface TripStats {
     journalCount: number;
@@ -21,7 +19,12 @@ interface TripStats {
     entriesWithGps: number;
 }
 
-interface UseTripDataReturn extends TripData {
+interface UseTripDataReturn {
+    trip: Trip | null;
+    entries: JournalEntryWithMedia[];
+    media: MediaAsset[];
+    expenses: Expense[];
+    stories: Story[];
     loading: boolean;
     error: string | null;
     stats: TripStats;
@@ -30,83 +33,67 @@ interface UseTripDataReturn extends TripData {
 }
 
 /**
- * Hook for fetching and managing trip data
- * Centralizes all trip-related data fetching logic
+ * Hook for fetching all trip-related data
  */
 export function useTripData(tripId: string): UseTripDataReturn {
-    const [data, setData] = useState<TripData>({
-        trip: null,
-        entries: [],
-        media: [],
-        expenses: [],
-        stories: [],
-    });
+    const [trip, setTrip] = useState<Trip | null>(null);
+    const [entries, setEntries] = useState<JournalEntryWithMedia[]>([]);
+    const [media, setMedia] = useState<MediaAsset[]>([]);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
+    const [stories, setStories] = useState<Story[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchData = useCallback(async () => {
+        if (!tripId) return;
+
         setLoading(true);
         setError(null);
 
         try {
             const supabase = getSupabaseClient();
 
-            // Fetch trip
-            const { data: tripData, error: tripError } = await supabase
-                .from('trips')
-                .select('*')
-                .eq('id', tripId)
-                .single();
+            // Fetch all data in parallel
+            const [tripResult, entriesResult, mediaResult, expensesResult, storiesResult] =
+                await Promise.all([
+                    supabase.from('trips').select('*').eq('id', tripId).single(),
+                    supabase
+                        .from('journal_entries')
+                        .select('*, media_assets(*)')
+                        .eq('trip_id', tripId)
+                        .order('entry_date', { ascending: true }),
+                    supabase
+                        .from('media_assets')
+                        .select('*')
+                        .eq('trip_id', tripId)
+                        .order('created_at', { ascending: false }),
+                    supabase
+                        .from('expenses')
+                        .select('*')
+                        .eq('trip_id', tripId)
+                        .order('expense_date', { ascending: false }),
+                    supabase
+                        .from('stories')
+                        .select('*')
+                        .eq('trip_id', tripId)
+                        .order('created_at', { ascending: false }),
+                ]);
 
-            if (tripError) throw new Error('Voyage non trouvé');
+            if (tripResult.error) throw tripResult.error;
 
-            // Fetch journal entries
-            const { data: entriesData } = await supabase
-                .from('journal_entries')
-                .select('*')
-                .eq('trip_id', tripId)
-                .order('entry_date', { ascending: false });
-
-            // Fetch media
-            const { data: mediaData } = await supabase
-                .from('media_assets')
-                .select('*')
-                .eq('trip_id', tripId)
-                .order('taken_at', { ascending: false });
-
-            // Map media to entries
-            const entriesWithMedia: JournalEntryWithMedia[] = (entriesData || []).map(
-                (entry) => ({
-                    ...entry,
-                    media_assets: (mediaData || []).filter(
-                        (m) => m.journal_entry_id === entry.id
-                    ),
-                })
+            setTrip(tripResult.data);
+            setEntries(entriesResult.data || []);
+            setMedia(mediaResult.data || []);
+            setExpenses(
+                (expensesResult.data || []).map((e) => ({
+                    ...e,
+                    date: e.expense_date,
+                }))
             );
-
-            // Fetch expenses
-            const { data: expensesData } = await supabase
-                .from('expenses')
-                .select('*')
-                .eq('trip_id', tripId)
-                .order('expense_date', { ascending: false });
-
-            // Fetch stories
-            const { data: storiesData } = await supabase
-                .from('stories')
-                .select('*')
-                .eq('trip_id', tripId)
-                .order('created_at', { ascending: false });
-
-            setData({
-                trip: tripData,
-                entries: entriesWithMedia,
-                media: mediaData || [],
-                expenses: expensesData || [],
-                stories: storiesData || [],
-            });
+            setStories(storiesResult.data || []);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+            console.error('Error fetching trip data:', err);
+            setError('Erreur lors du chargement des données');
         } finally {
             setLoading(false);
         }
@@ -118,28 +105,33 @@ export function useTripData(tripId: string): UseTripDataReturn {
 
     // Computed stats
     const stats = useMemo<TripStats>(() => {
-        const photos = data.media.filter((m) => m.media_type === 'photo');
-        const videos = data.media.filter((m) => m.media_type === 'video');
-        const entriesWithGps = data.entries.filter((e) => e.lat && e.lng);
+        const photosCount = media.filter((m) => m.media_type === 'photo').length;
+        const videosCount = media.filter((m) => m.media_type === 'video').length;
+        const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+        const entriesWithGps = entries.filter((e) => e.lat && e.lng).length;
 
         return {
-            journalCount: data.entries.length,
-            photosCount: photos.length,
-            videosCount: videos.length,
-            totalExpenses: data.expenses.reduce((sum, e) => sum + (e.amount || 0), 0),
-            storiesCount: data.stories.length,
-            entriesWithGps: entriesWithGps.length,
+            journalCount: entries.length,
+            photosCount,
+            videosCount,
+            totalExpenses,
+            storiesCount: stories.length,
+            entriesWithGps,
         };
-    }, [data]);
+    }, [entries, media, expenses, stories]);
 
-    // Trip name helper
+    // Formatted trip name
     const tripName = useMemo(() => {
-        if (!data.trip) return '';
-        return `${data.trip.country}${data.trip.city ? ` - ${data.trip.city}` : ''}`;
-    }, [data.trip]);
+        if (!trip) return '';
+        return trip.city ? `${trip.country} - ${trip.city}` : trip.country;
+    }, [trip]);
 
     return {
-        ...data,
+        trip,
+        entries,
+        media,
+        expenses,
+        stories,
         loading,
         error,
         stats,

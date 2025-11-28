@@ -2,118 +2,116 @@
 
 import { useState, useCallback, useRef } from 'react';
 
-/**
- * Hook for managing single selection state
- * Useful for timeline, list item selection, etc.
- */
-export function useSelection<T = string>(initialValue: T | null = null) {
-    const [selected, setSelected] = useState<T | null>(initialValue);
-
-    const select = useCallback((value: T) => {
-        setSelected(value);
-    }, []);
-
-    const clear = useCallback(() => {
-        setSelected(null);
-    }, []);
-
-    const toggle = useCallback((value: T) => {
-        setSelected((prev) => (prev === value ? null : value));
-    }, []);
-
-    const isSelected = useCallback(
-        (value: T) => selected === value,
-        [selected]
-    );
-
-    return {
-        selected,
-        select,
-        clear,
-        toggle,
-        isSelected,
-    };
+interface UseSelectionReturn<T> {
+    selected: T | null;
+    select: (item: T) => void;
+    clear: () => void;
+    toggle: (item: T) => void;
+    isSelected: (item: T) => boolean;
 }
 
 /**
- * Hook for managing multiple selections
+ * Hook for single selection state
  */
-export function useMultiSelection<T = string>(initialValues: T[] = []) {
-    const [selected, setSelected] = useState<Set<T>>(new Set(initialValues));
+export function useSelection<T>(initial: T | null = null): UseSelectionReturn<T> {
+    const [selected, setSelected] = useState<T | null>(initial);
 
-    const add = useCallback((value: T) => {
-        setSelected((prev) => new Set(prev).add(value));
-    }, []);
-
-    const remove = useCallback((value: T) => {
-        setSelected((prev) => {
-            const next = new Set(prev);
-            next.delete(value);
-            return next;
-        });
-    }, []);
-
-    const toggle = useCallback((value: T) => {
-        setSelected((prev) => {
-            const next = new Set(prev);
-            if (next.has(value)) {
-                next.delete(value);
-            } else {
-                next.add(value);
-            }
-            return next;
-        });
-    }, []);
-
-    const clear = useCallback(() => {
-        setSelected(new Set());
-    }, []);
-
-    const selectAll = useCallback((values: T[]) => {
-        setSelected(new Set(values));
-    }, []);
-
-    const isSelected = useCallback(
-        (value: T) => selected.has(value),
-        [selected]
+    const select = useCallback((item: T) => setSelected(item), []);
+    const clear = useCallback(() => setSelected(null), []);
+    const toggle = useCallback(
+        (item: T) => setSelected((prev) => (prev === item ? null : item)),
+        []
     );
+    const isSelected = useCallback((item: T) => selected === item, [selected]);
+
+    return { selected, select, clear, toggle, isSelected };
+}
+
+interface UseMultiSelectionReturn<T> {
+    selected: T[];
+    selectedSet: Set<T>;
+    add: (item: T) => void;
+    remove: (item: T) => void;
+    toggle: (item: T) => void;
+    clear: () => void;
+    selectAll: (items: T[]) => void;
+    isSelected: (item: T) => boolean;
+    count: number;
+}
+
+/**
+ * Hook for multiple selection state
+ */
+export function useMultiSelection<T>(initial: T[] = []): UseMultiSelectionReturn<T> {
+    const [selected, setSelected] = useState<T[]>(initial);
+    const selectedSet = new Set(selected);
+
+    const add = useCallback((item: T) => {
+        setSelected((prev) => (prev.includes(item) ? prev : [...prev, item]));
+    }, []);
+
+    const remove = useCallback((item: T) => {
+        setSelected((prev) => prev.filter((i) => i !== item));
+    }, []);
+
+    const toggle = useCallback((item: T) => {
+        setSelected((prev) =>
+            prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+        );
+    }, []);
+
+    const clear = useCallback(() => setSelected([]), []);
+    const selectAll = useCallback((items: T[]) => setSelected(items), []);
+    const isSelected = useCallback((item: T) => selectedSet.has(item), [selectedSet]);
 
     return {
-        selected: Array.from(selected),
-        selectedSet: selected,
+        selected,
+        selectedSet,
         add,
         remove,
         toggle,
         clear,
         selectAll,
         isSelected,
-        count: selected.size,
+        count: selected.length,
     };
 }
 
+interface UseElementRefsReturn<T> {
+    setRef: (id: string) => (el: T | null) => void;
+    getRef: (id: string) => T | null;
+    scrollTo: (id: string, options?: ScrollIntoViewOptions) => void;
+    refs: Map<string, T>;
+}
+
 /**
- * Hook for element refs mapping (useful for scroll-to-element)
+ * Hook for managing element refs for scroll-to functionality
  */
-export function useElementRefs<T extends HTMLElement = HTMLDivElement>() {
-    const refs = useRef<Record<string, T | null>>({});
+export function useElementRefs<T extends HTMLElement>(): UseElementRefsReturn<T> {
+    const refsMap = useRef<Map<string, T>>(new Map());
 
-    const setRef = useCallback((id: string) => (el: T | null) => {
-        refs.current[id] = el;
-    }, []);
+    const setRef = useCallback(
+        (id: string) => (el: T | null) => {
+            if (el) {
+                refsMap.current.set(id, el);
+            } else {
+                refsMap.current.delete(id);
+            }
+        },
+        []
+    );
 
-    const getRef = useCallback((id: string) => refs.current[id], []);
+    const getRef = useCallback((id: string) => refsMap.current.get(id) || null, []);
 
-    const scrollTo = useCallback((id: string, options: ScrollIntoViewOptions = { behavior: 'smooth', block: 'center' }) => {
-        const element = refs.current[id];
-        if (element) {
-            element.scrollIntoView(options);
-        }
-    }, []);
+    const scrollTo = useCallback(
+        (id: string, options: ScrollIntoViewOptions = { behavior: 'smooth', block: 'center' }) => {
+            const el = refsMap.current.get(id);
+            if (el) {
+                el.scrollIntoView(options);
+            }
+        },
+        []
+    );
 
-    return {
-        setRef,
-        getRef,
-        scrollTo,
-        refs: refs.current,
-    };
+    return { setRef, getRef, scrollTo, refs: refsMap.current };
 }

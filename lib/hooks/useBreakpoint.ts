@@ -1,24 +1,24 @@
 'use client';
 
-import { useTheme, useMediaQuery as useMuiMediaQuery } from '@mui/material';
+import { useTheme, useMediaQuery } from '@mui/material';
 
 /**
- * Custom hook for responsive breakpoints
- * Provides semantic helpers for common breakpoint checks
+ * Hook for semantic breakpoint helpers
+ * Replaces verbose useMediaQuery(theme.breakpoints.down('sm')) patterns
  */
 export function useBreakpoint() {
     const theme = useTheme();
 
-    const isMobile = useMuiMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMuiMediaQuery(theme.breakpoints.between('sm', 'md'));
-    const isDesktop = useMuiMediaQuery(theme.breakpoints.up('md'));
-    const isLargeDesktop = useMuiMediaQuery(theme.breakpoints.up('lg'));
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+    const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+    const isLargeDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
-    // For specific checks
-    const isSmallDown = useMuiMediaQuery(theme.breakpoints.down('sm'));
-    const isMediumDown = useMuiMediaQuery(theme.breakpoints.down('md'));
-    const isSmallUp = useMuiMediaQuery(theme.breakpoints.up('sm'));
-    const isMediumUp = useMuiMediaQuery(theme.breakpoints.up('md'));
+    // Convenience helpers
+    const isSmallDown = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMediumDown = useMediaQuery(theme.breakpoints.down('md'));
+    const isSmallUp = useMediaQuery(theme.breakpoints.up('sm'));
+    const isMediumUp = useMediaQuery(theme.breakpoints.up('md'));
 
     return {
         isMobile,

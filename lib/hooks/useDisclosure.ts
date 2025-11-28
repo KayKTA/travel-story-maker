@@ -2,33 +2,47 @@
 
 import { useState, useCallback } from 'react';
 
+interface UseDisclosureReturn {
+    isOpen: boolean;
+    onOpen: () => void;
+    onClose: () => void;
+    onToggle: () => void;
+}
+
 /**
- * Hook for managing open/close state of modals, drawers, dialogs
- * @param initialState - Initial open state (default: false)
+ * Hook for managing disclosure state (modals, drawers, dropdowns)
  */
-export function useDisclosure(initialState = false) {
+export function useDisclosure(initialState: boolean = false): UseDisclosureReturn {
     const [isOpen, setIsOpen] = useState(initialState);
 
     const onOpen = useCallback(() => setIsOpen(true), []);
     const onClose = useCallback(() => setIsOpen(false), []);
     const onToggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
-    return {
-        isOpen,
-        onOpen,
-        onClose,
-        onToggle,
-    };
+    return { isOpen, onOpen, onClose, onToggle };
+}
+
+interface UseMultiDisclosureReturn<T extends string> {
+    openStates: Record<T, boolean>;
+    open: (key: T) => void;
+    close: (key: T) => void;
+    toggle: (key: T) => void;
+    closeAll: () => void;
+    isOpen: (key: T) => boolean;
 }
 
 /**
- * Hook for managing multiple disclosure states
- * Useful for forms with multiple dialogs
+ * Hook for managing multiple disclosures
  */
-export function useMultiDisclosure<T extends string>(keys: T[]) {
-    const [openStates, setOpenStates] = useState<Record<T, boolean>>(
-        () => keys.reduce((acc, key) => ({ ...acc, [key]: false }), {} as Record<T, boolean>)
+export function useMultiDisclosure<T extends string>(
+    keys: T[]
+): UseMultiDisclosureReturn<T> {
+    const initialState = keys.reduce(
+        (acc, key) => ({ ...acc, [key]: false }),
+        {} as Record<T, boolean>
     );
+
+    const [openStates, setOpenStates] = useState(initialState);
 
     const open = useCallback((key: T) => {
         setOpenStates((prev) => ({ ...prev, [key]: true }));
@@ -43,17 +57,10 @@ export function useMultiDisclosure<T extends string>(keys: T[]) {
     }, []);
 
     const closeAll = useCallback(() => {
-        setOpenStates(keys.reduce((acc, key) => ({ ...acc, [key]: false }), {} as Record<T, boolean>));
-    }, [keys]);
+        setOpenStates(initialState);
+    }, [initialState]);
 
     const isOpen = useCallback((key: T) => openStates[key], [openStates]);
 
-    return {
-        openStates,
-        open,
-        close,
-        toggle,
-        closeAll,
-        isOpen,
-    };
+    return { openStates, open, close, toggle, closeAll, isOpen };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
     Box,
     Tabs,
@@ -11,8 +11,6 @@ import {
     CardContent,
     Chip,
     Stack,
-    useTheme,
-    useMediaQuery,
 } from '@mui/material';
 import {
     Dashboard as DashboardIcon,
@@ -25,6 +23,8 @@ import MediaGallery from '@/components/media/MediaGallery';
 import ExpenseList from '@/components/expenses/ExpenseList';
 import { formatCurrency, getDurationDays } from '@/lib/utils/formatters';
 import { TRIP_MOODS } from '@/types/trip';
+import { useBreakpoint } from '@/lib/hooks';
+import { tokens } from '@/styles';
 import OverviewStatCard from './OverviewStatCard';
 import type {
     Trip,
@@ -78,13 +78,15 @@ export default function TripTabs({
     stats,
     onRefresh,
 }: TripTabsProps) {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { isMobile } = useBreakpoint();
     const [currentTab, setCurrentTab] = useState(0);
 
     const moodData = TRIP_MOODS.find((m) => m.value === trip.mood);
     const durationDays = getDurationDays(trip.start_date, trip.end_date);
-    const entriesWithGps = journalEntries.filter((e) => e.lat && e.lng).length;
+    const entriesWithGps = useMemo(
+        () => journalEntries.filter((e) => e.lat && e.lng).length,
+        [journalEntries]
+    );
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
@@ -139,11 +141,11 @@ export default function TripTabs({
                                                 position: 'absolute',
                                                 top: -6,
                                                 right: -10,
-                                                bgcolor: '#1A1A1A',
-                                                color: '#F5B82E',
+                                                bgcolor: 'primary.main',
+                                                color: 'primary.contrastText',
                                                 fontSize: 10,
-                                                fontWeight: 800,
-                                                borderRadius: '50%',
+                                                fontWeight: tokens.fontWeights.extrabold,
+                                                borderRadius: tokens.radius.circle,
                                                 width: 18,
                                                 height: 18,
                                                 display: 'flex',
@@ -216,9 +218,9 @@ export default function TripTabs({
                                         <Chip
                                             label={`${moodData.emoji} ${moodData.label}`}
                                             sx={{
-                                                bgcolor: '#1A1A1A',
-                                                color: '#F5B82E',
-                                                fontWeight: 700,
+                                                bgcolor: 'primary.main',
+                                                color: 'primary.contrastText',
+                                                fontWeight: tokens.fontWeights.bold,
                                             }}
                                         />
                                     </Box>
@@ -227,7 +229,7 @@ export default function TripTabs({
                                 {/* Description */}
                                 {trip.description && (
                                     <Box>
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: tokens.fontWeights.bold }}>
                                             À propos
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -245,17 +247,19 @@ export default function TripTabs({
                                             gap: 1,
                                             cursor: 'pointer',
                                             p: 1.5,
-                                            borderRadius: 2,
-                                            bgcolor: 'rgba(26, 26, 26, 0.03)',
-                                            border: '2px dashed rgba(26, 26, 26, 0.1)',
+                                            borderRadius: tokens.radius.md,
+                                            bgcolor: 'action.hover',
+                                            border: 2,
+                                            borderStyle: 'dashed',
+                                            borderColor: 'divider',
                                             '&:hover': {
-                                                bgcolor: 'rgba(26, 26, 26, 0.05)',
+                                                bgcolor: 'action.selected',
                                             },
                                         }}
                                         onClick={() => setCurrentTab(1)}
                                     >
-                                        <ExploreIcon sx={{ color: '#1A1A1A' }} />
-                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                        <ExploreIcon sx={{ color: 'primary.main' }} />
+                                        <Typography variant="body2" sx={{ fontWeight: tokens.fontWeights.semibold }}>
                                             {entriesWithGps} étape{entriesWithGps > 1 ? 's' : ''} sur la carte
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
@@ -278,7 +282,7 @@ export default function TripTabs({
                                     mb: 1.5,
                                 }}
                             >
-                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: tokens.fontWeights.bold }}>
                                     Dernières étapes
                                 </Typography>
                                 <Chip
@@ -287,9 +291,9 @@ export default function TripTabs({
                                     onClick={() => setCurrentTab(1)}
                                     sx={{
                                         cursor: 'pointer',
-                                        bgcolor: '#1A1A1A',
-                                        color: '#F5B82E',
-                                        fontWeight: 700,
+                                        bgcolor: 'primary.main',
+                                        color: 'primary.contrastText',
+                                        fontWeight: tokens.fontWeights.bold,
                                     }}
                                 />
                             </Box>
@@ -305,7 +309,7 @@ export default function TripTabs({
                                                 }}
                                             >
                                                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                                    <Typography variant="body2" sx={{ fontWeight: tokens.fontWeights.bold }}>
                                                         {entry.location ||
                                                             new Date(entry.entry_date).toLocaleDateString('fr-FR', {
                                                                 day: 'numeric',
@@ -333,7 +337,7 @@ export default function TripTabs({
                                                         sx={{
                                                             ml: 1,
                                                             height: 24,
-                                                            bgcolor: 'rgba(26, 26, 26, 0.05)',
+                                                            bgcolor: 'action.hover',
                                                         }}
                                                     />
                                                 )}

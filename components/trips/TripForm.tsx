@@ -16,8 +16,6 @@ import {
     Box,
     Alert,
     CircularProgress,
-    useTheme,
-    useMediaQuery,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -25,6 +23,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { fr } from 'date-fns/locale';
 import { TRIP_MOODS, type TripFormData, type Trip, type TripMood } from '@/types/trip';
 import { validateTrip } from '@/lib/utils/validators';
+import { useBreakpoint } from '@/lib/hooks';
+import { tokens } from '@/styles';
 
 interface TripFormProps {
     open: boolean;
@@ -34,7 +34,7 @@ interface TripFormProps {
     isEditing?: boolean;
 }
 
-const emptyFormData: TripFormData = {
+const EMPTY_FORM_DATA: TripFormData = {
     country: '',
     city: '',
     start_date: '',
@@ -45,6 +45,9 @@ const emptyFormData: TripFormData = {
     description: '',
 };
 
+// Z-index for popovers above dialog
+const POPPER_Z_INDEX = { sx: { zIndex: tokens.zIndex.tooltip } };
+
 export default function TripForm({
     open,
     onClose,
@@ -52,10 +55,9 @@ export default function TripForm({
     initialData,
     isEditing = false,
 }: TripFormProps) {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { isMobile } = useBreakpoint();
 
-    const [formData, setFormData] = useState<TripFormData>(emptyFormData);
+    const [formData, setFormData] = useState<TripFormData>(EMPTY_FORM_DATA);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<string[]>([]);
 
@@ -74,20 +76,20 @@ export default function TripForm({
                     description: initialData.description || '',
                 });
             } else {
-                setFormData(emptyFormData);
+                setFormData(EMPTY_FORM_DATA);
             }
             setErrors([]);
         }
     }, [open, initialData]);
 
-    const handleChange = (field: keyof TripFormData, value: unknown) => {
+    const handleChange = <K extends keyof TripFormData>(field: K, value: TripFormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         setErrors([]);
     };
 
     const handleClose = () => {
         if (!loading) {
-            setFormData(emptyFormData);
+            setFormData(EMPTY_FORM_DATA);
             setErrors([]);
             onClose();
         }
@@ -103,9 +105,9 @@ export default function TripForm({
         setLoading(true);
         try {
             await onSubmit(formData);
-            setFormData(emptyFormData);
+            setFormData(EMPTY_FORM_DATA);
             onClose();
-        } catch (error) {
+        } catch {
             setErrors(['Une erreur est survenue. Veuillez réessayer.']);
         } finally {
             setLoading(false);
@@ -119,16 +121,14 @@ export default function TripForm({
             fullScreen={isMobile}
             maxWidth="sm"
             fullWidth
-            // Disable portal for nested popovers to work correctly
             disablePortal={false}
-            // Ensure dialog has proper stacking context
             sx={{
                 '& .MuiDialog-paper': {
                     overflow: 'visible',
                 },
             }}
         >
-            <DialogTitle>
+            <DialogTitle sx={{ fontWeight: tokens.fontWeights.bold }}>
                 {isEditing ? 'Modifier le voyage' : 'Nouveau voyage'}
             </DialogTitle>
 
@@ -167,18 +167,11 @@ export default function TripForm({
                                     label="Date de début"
                                     value={formData.start_date ? new Date(formData.start_date) : null}
                                     onChange={(date) =>
-                                        handleChange(
-                                            'start_date',
-                                            date ? date.toISOString().split('T')[0] : ''
-                                        )
+                                        handleChange('start_date', date ? date.toISOString().split('T')[0] : '')
                                     }
                                     slotProps={{
                                         textField: { fullWidth: true, required: true },
-                                        popper: {
-                                            // Force popper to render above dialog
-                                            sx: { zIndex: 1500 },
-                                            placement: 'bottom-start',
-                                        },
+                                        popper: { ...POPPER_Z_INDEX, placement: 'bottom-start' },
                                     }}
                                 />
                             </Grid>
@@ -187,20 +180,12 @@ export default function TripForm({
                                     label="Date de fin"
                                     value={formData.end_date ? new Date(formData.end_date) : null}
                                     onChange={(date) =>
-                                        handleChange(
-                                            'end_date',
-                                            date ? date.toISOString().split('T')[0] : ''
-                                        )
+                                        handleChange('end_date', date ? date.toISOString().split('T')[0] : '')
                                     }
-                                    minDate={
-                                        formData.start_date ? new Date(formData.start_date) : undefined
-                                    }
+                                    minDate={formData.start_date ? new Date(formData.start_date) : undefined}
                                     slotProps={{
                                         textField: { fullWidth: true },
-                                        popper: {
-                                            sx: { zIndex: 1500 },
-                                            placement: 'bottom-start',
-                                        },
+                                        popper: { ...POPPER_Z_INDEX, placement: 'bottom-start' },
                                     }}
                                 />
                             </Grid>
@@ -213,17 +198,9 @@ export default function TripForm({
                                 label="Humeur globale"
                                 onChange={(e) => handleChange('mood', e.target.value as TripMood)}
                                 MenuProps={{
-                                    // Force menu to render above dialog
-                                    sx: { zIndex: 1500 },
-                                    // Ensure menu is positioned correctly
-                                    anchorOrigin: {
-                                        vertical: 'bottom',
-                                        horizontal: 'left',
-                                    },
-                                    transformOrigin: {
-                                        vertical: 'top',
-                                        horizontal: 'left',
-                                    },
+                                    ...POPPER_Z_INDEX,
+                                    anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                                    transformOrigin: { vertical: 'top', horizontal: 'left' },
                                 }}
                             >
                                 <MenuItem value="">
@@ -287,7 +264,7 @@ export default function TripForm({
                     variant="contained"
                     onClick={handleSubmit}
                     disabled={loading}
-                    startIcon={loading && <CircularProgress size={20} />}
+                    startIcon={loading ? <CircularProgress size={20} /> : null}
                 >
                     {isEditing ? 'Enregistrer' : 'Créer le voyage'}
                 </Button>

@@ -9,7 +9,6 @@ import {
     Typography,
     Chip,
     Stack,
-    useTheme,
 } from '@mui/material';
 import {
     CalendarMonth as CalendarIcon,
@@ -20,14 +19,18 @@ import {
 import Link from 'next/link';
 import { formatDateRange, formatCurrency } from '@/lib/utils/formatters';
 import { TRIP_MOODS } from '@/types/trip';
+import { tokens, textTruncate } from '@/styles';
+import { StatItem } from '@/components/common';
 import type { TripWithStats } from '@/types';
 
 interface TripCardProps {
     trip: TripWithStats;
 }
 
+// Cover image height
+const COVER_HEIGHT = 140;
+
 export default function TripCard({ trip }: TripCardProps) {
-    const theme = useTheme();
     const moodData = TRIP_MOODS.find((m) => m.value === trip.mood);
 
     return (
@@ -36,10 +39,10 @@ export default function TripCard({ trip }: TripCardProps) {
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out',
+                transition: tokens.transitions.fast,
                 '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: theme.shadows[2],
+                    boxShadow: 2,
                 },
             }}
         >
@@ -56,32 +59,29 @@ export default function TripCard({ trip }: TripCardProps) {
                 {/* Cover */}
                 <Box
                     sx={{
-                        height: 140,
+                        height: COVER_HEIGHT,
                         background: trip.cover_image_url
                             ? `url(${trip.cover_image_url}) center/cover`
                             : (theme) =>
-                                  `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`,
+                                `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`,
                         position: 'relative',
                     }}
                 >
-                    {/* Overlay */}
+                    {/* Overlay with title */}
                     <Box
                         sx={{
                             position: 'absolute',
                             inset: 'auto 0 0 0',
                             p: 2,
                             background: (theme) =>
-                                `linear-gradient(to top, ${alpha(
-                                    theme.palette.common.black,
-                                    0.7,
-                                )}, transparent)`,
+                                `linear-gradient(to top, ${alpha(theme.palette.common.black, 0.7)}, transparent)`,
                         }}
                     >
                         <Typography
                             variant="h6"
                             sx={{
                                 color: 'common.white',
-                                fontWeight: 700,
+                                fontWeight: tokens.fontWeights.bold,
                             }}
                         >
                             {trip.country}
@@ -106,7 +106,7 @@ export default function TripCard({ trip }: TripCardProps) {
                                 top: 12,
                                 right: 12,
                                 bgcolor: 'background.paper',
-                                fontWeight: 500,
+                                fontWeight: tokens.fontWeights.medium,
                             }}
                         />
                     )}
@@ -114,7 +114,7 @@ export default function TripCard({ trip }: TripCardProps) {
 
                 {/* Content */}
                 <CardContent sx={{ flex: 1 }}>
-                    {/* Date */}
+                    {/* Date row */}
                     <Box
                         sx={{
                             display: 'flex',
@@ -124,10 +124,7 @@ export default function TripCard({ trip }: TripCardProps) {
                         }}
                     >
                         <CalendarIcon fontSize="small" color="action" />
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                        >
+                        <Typography variant="body2" color="text.secondary">
                             {formatDateRange(trip.start_date, trip.end_date)}
                         </Typography>
                         <Chip
@@ -141,55 +138,22 @@ export default function TripCard({ trip }: TripCardProps) {
                     {/* Stats */}
                     <Stack direction="row" spacing={2} flexWrap="wrap">
                         {trip.photos_count > 0 && (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                }}
-                            >
-                                <PhotoIcon fontSize="small" color="action" />
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                >
-                                    {trip.photos_count}
-                                </Typography>
-                            </Box>
+                            <StatItem
+                                icon={<PhotoIcon fontSize="small" />}
+                                value={trip.photos_count}
+                            />
                         )}
                         {trip.videos_count > 0 && (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                }}
-                            >
-                                <VideoIcon fontSize="small" color="action" />
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                >
-                                    {trip.videos_count}
-                                </Typography>
-                            </Box>
+                            <StatItem
+                                icon={<VideoIcon fontSize="small" />}
+                                value={trip.videos_count}
+                            />
                         )}
                         {trip.total_expenses > 0 && (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                }}
-                            >
-                                <EuroIcon fontSize="small" color="action" />
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                >
-                                    {formatCurrency(trip.total_expenses)}
-                                </Typography>
-                            </Box>
+                            <StatItem
+                                icon={<EuroIcon fontSize="small" />}
+                                value={formatCurrency(trip.total_expenses)}
+                            />
                         )}
                     </Stack>
 
@@ -200,11 +164,7 @@ export default function TripCard({ trip }: TripCardProps) {
                             color="text.secondary"
                             sx={{
                                 mt: 2,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
+                                ...textTruncate(2),
                             }}
                         >
                             {trip.description}

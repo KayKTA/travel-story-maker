@@ -7,6 +7,7 @@ export { default as TripForm } from './TripForm';
 export { default as TripHeaderBar } from './TripHeaderBar';
 export { default as TripList } from './TripList';
 export { default as TripMapView } from './TripMapView';
+export { default as TripOverviewDashboard } from './TripOverviewDashboard';
 export { default as TripsPageClient } from './TripsPageClient';
 export { default as TripTabs } from './TripTabs';
 

@@ -8,16 +8,18 @@ import type {
     MediaAsset,
     Expense,
     Story,
+    TripWithStats,
+    TripStats,
 } from '@/types';
 
-interface TripStats {
-    journalCount: number;
-    photosCount: number;
-    videosCount: number;
-    totalExpenses: number;
-    storiesCount: number;
-    entriesWithGps: number;
-}
+// interface TripStats {
+//     journalCount: number;
+//     photosCount: number;
+//     videosCount: number;
+//     totalExpenses: number;
+//     storiesCount: number;
+//     entriesWithGps: number;
+// }
 
 interface UseTripDataReturn {
     trip: Trip | null;
@@ -54,7 +56,7 @@ export function useTripData(tripId: string): UseTripDataReturn {
             const supabase = getSupabaseClient();
 
             // Fetch all data in parallel
-            const [tripResult, entriesResult, mediaResult, expensesResult, storiesResult] =
+            const [tripResult, entriesResult, mediaResult, expensesResult] =
                 await Promise.all([
                     supabase.from('trips').select('*').eq('id', tripId).single(),
                     supabase
@@ -72,11 +74,11 @@ export function useTripData(tripId: string): UseTripDataReturn {
                         .select('*')
                         .eq('trip_id', tripId)
                         .order('expense_date', { ascending: false }),
-                    supabase
-                        .from('stories')
-                        .select('*')
-                        .eq('trip_id', tripId)
-                        .order('created_at', { ascending: false }),
+                    // supabase
+                    //     .from('stories')
+                    //     .select('*')
+                    //     .eq('trip_id', tripId)
+                    //     .order('created_at', { ascending: false }),
                 ]);
 
             if (tripResult.error) throw tripResult.error;
@@ -90,7 +92,7 @@ export function useTripData(tripId: string): UseTripDataReturn {
                     date: e.expense_date,
                 }))
             );
-            setStories(storiesResult.data || []);
+            // setStories(storiesResult.data || []);
         } catch (err) {
             console.error('Error fetching trip data:', err);
             setError('Erreur lors du chargement des données');

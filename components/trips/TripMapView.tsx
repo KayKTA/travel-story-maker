@@ -28,6 +28,7 @@ export default function TripMapView({
 }: TripMapViewProps) {
     const mapRef = useRef<L.Map | null>(null);
     const markersRef = useRef<Record<string, L.Marker>>({});
+    const routeRef = useRef<L.Polyline | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Initialize map
@@ -44,11 +45,22 @@ export default function TripMapView({
             zoomControl: true,
         });
 
-        // Tile layer - using CartoDB for a clean look
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        // Colorful map tiles - Using OpenStreetMap with nice colors
+        // Option 1: Stadia Maps - Alidade Smooth (colorful & modern)
+        // Option 2: Stamen Watercolor (artistic)
+        // Option 3: OpenStreetMap Standard (more colorful than CartoDB)
+
+        // Using OpenStreetMap with nice styling
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
         }).addTo(map);
+
+        // Alternative: Stadia Alidade Smooth (uncomment to use)
+        // L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+        //   attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>',
+        //   maxZoom: 20,
+        // }).addTo(map);
 
         mapRef.current = map;
 
@@ -68,36 +80,63 @@ export default function TripMapView({
         Object.values(markersRef.current).forEach((marker) => marker.remove());
         markersRef.current = {};
 
+        // Clear existing route
+        if (routeRef.current) {
+            routeRef.current.remove();
+            routeRef.current = null;
+        }
+
         if (entries.length === 0) return;
 
         const bounds = L.latLngBounds([]);
+        const routeCoords: [number, number][] = [];
 
         // Add markers for each entry
         entries.forEach((entry, index) => {
             if (!entry.lat || !entry.lng) return;
 
+            routeCoords.push([entry.lat, entry.lng]);
+
             const moodData = JOURNAL_MOODS.find((m) => m.value === entry.mood);
             const isSelected = selectedEntryId === entry.id;
-            const color = moodData?.color || '#1A1A1A';
+            const isFirst = index === 0;
+            const isLast = index === entries.length - 1;
 
-            // Create custom icon
+            // Determine marker color
+            let bgColor = moodData?.color || '#6B7280';
+            let borderColor = '#FFFFFF';
+
+            if (isFirst) {
+                bgColor = '#10B981'; // Green for start
+            } else if (isLast) {
+                bgColor = '#6366F1'; // Purple for end
+            }
+
+            if (isSelected) {
+                borderColor = '#FACC15'; // Yellow highlight
+            }
+
+            // Create custom icon with cleaner design
+            const size = isSelected ? 38 : 30;
             const iconHtml = `
         <div style="
-          width: ${isSelected ? 36 : 28}px;
-          height: ${isSelected ? 36 : 28}px;
-          background: ${color};
-          border: 3px solid ${isSelected ? '#F5B82E' : '#FFFDF5'};
+          width: ${size}px;
+          height: ${size}px;
+          background: ${bgColor};
+          border: 3px solid ${borderColor};
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           color: white;
-          font-weight: 800;
+          font-weight: 700;
           font-size: ${isSelected ? 14 : 12}px;
-          font-family: 'DM Sans', sans-serif;
-          box-shadow: ${isSelected ? '0 0 0 4px rgba(245, 184, 46, 0.3), ' : ''}0 2px 8px rgba(0,0,0,0.3);
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          box-shadow: ${isSelected
+                    ? '0 0 0 4px rgba(250, 204, 21, 0.4), 0 4px 12px rgba(0,0,0,0.3)'
+                    : '0 2px 8px rgba(0,0,0,0.25)'};
           transition: all 0.2s ease;
-          transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'};
+          cursor: pointer;
         ">
           ${index + 1}
         </div>
@@ -106,8 +145,8 @@ export default function TripMapView({
             const icon = L.divIcon({
                 html: iconHtml,
                 className: 'custom-marker',
-                iconSize: [isSelected ? 36 : 28, isSelected ? 36 : 28],
-                iconAnchor: [isSelected ? 18 : 14, isSelected ? 18 : 14],
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size / 2],
             });
 
             const marker = L.marker([entry.lat, entry.lng], { icon })
@@ -116,32 +155,47 @@ export default function TripMapView({
                     onMarkerClick?.(entry.id);
                 });
 
-            // Popup content
+            // Popup content with modern design
             const photos = entry.media_assets?.filter((m) => m.media_type === 'photo') || [];
             const photoHtml = photos.length > 0
-                ? `<div style="display: flex; gap: 4px; margin-top: 8px;">
-            ${photos.slice(0, 2).map((p) =>
-                    `<img src="${p.thumbnail_url || p.url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />`
+                ? `<div style="display: flex; gap: 4px; margin-top: 10px;">
+            ${photos.slice(0, 3).map((p) =>
+                    `<img src="${p.thumbnail_url || p.url}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px;" />`
                 ).join('')}
-            ${photos.length > 2 ? `<div style="width: 50px; height: 50px; background: #1A1A1A; color: #F5B82E; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">+${photos.length - 2}</div>` : ''}
+            ${photos.length > 3
+                    ? `<div style="width: 48px; height: 48px; background: #18181B; color: #FACC15; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">+${photos.length - 3}</div>`
+                    : ''}
           </div>`
                 : '';
 
+            const statusLabel = isFirst ? 'Départ' : isLast ? 'Arrivée' : moodData?.label || 'Étape';
+            const statusColor = isFirst ? '#10B981' : isLast ? '#6366F1' : bgColor;
+
             marker.bindPopup(`
-        <div style="font-family: 'DM Sans', sans-serif; min-width: 180px;">
-          <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">
-            ${moodData?.emoji || ''} ${entry.location || 'Étape ' + (index + 1)}
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-width: 200px; padding: 4px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 20px;">${moodData?.emoji || '📍'}</span>
+            <div>
+              <div style="font-weight: 600; font-size: 15px; color: #18181B;">
+                ${entry.location || 'Étape ' + (index + 1)}
+              </div>
+              <div style="font-size: 11px; color: ${statusColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                ${statusLabel}
+              </div>
+            </div>
           </div>
-          <div style="font-size: 12px; color: #666; margin-bottom: 6px;">
-            ${new Date(entry.entry_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+          <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px; padding: 6px 0; border-top: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB;">
+            ${new Date(entry.entry_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
-          <div style="font-size: 13px; color: #333; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-            ${entry.content?.substring(0, 150)}${entry.content && entry.content.length > 150 ? '...' : ''}
-          </div>
+          ${entry.content
+                    ? `<div style="font-size: 13px; color: #374151; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                ${entry.content.substring(0, 150)}${entry.content.length > 150 ? '...' : ''}
+              </div>`
+                    : ''}
           ${photoHtml}
         </div>
       `, {
-                maxWidth: 250,
+                maxWidth: 280,
                 className: 'custom-popup',
             });
 
@@ -149,23 +203,21 @@ export default function TripMapView({
             bounds.extend([entry.lat, entry.lng]);
         });
 
-        // Draw route line
-        const routeCoords = entries
-            .filter((e) => e.lat && e.lng)
-            .map((e) => [e.lat!, e.lng!] as [number, number]);
-
+        // Draw route line with dashed style
         if (routeCoords.length > 1) {
-            L.polyline(routeCoords, {
-                color: '#1A1A1A',
-                weight: 3,
-                opacity: 0.6,
+            routeRef.current = L.polyline(routeCoords, {
+                color: '#18181B',
+                weight: 2,
+                opacity: 0.7,
                 dashArray: '8, 8',
+                lineCap: 'round',
+                lineJoin: 'round',
             }).addTo(map);
         }
 
-        // Fit bounds
+        // Fit bounds with padding
         if (bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [50, 50] });
+            map.fitBounds(bounds, { padding: [60, 60] });
         }
     }, [entries, selectedEntryId, onMarkerClick]);
 
@@ -190,16 +242,34 @@ export default function TripMapView({
             sx={{
                 width: '100%',
                 height: '100%',
+                bgcolor: '#F8F9FA',
                 '& .custom-marker': {
-                    background: 'transparent',
-                    border: 'none',
+                    background: 'transparent !important',
+                    border: 'none !important',
                 },
                 '& .leaflet-popup-content-wrapper': {
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                    padding: 0,
+                },
+                '& .leaflet-popup-content': {
+                    margin: '12px 14px',
                 },
                 '& .leaflet-popup-tip': {
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                },
+                '& .leaflet-control-zoom': {
+                    border: 'none !important',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1) !important',
+                    borderRadius: '8px !important',
+                    overflow: 'hidden',
+                },
+                '& .leaflet-control-zoom-in, & .leaflet-control-zoom-out': {
+                    border: 'none !important',
+                    color: '#18181B !important',
+                    '&:hover': {
+                        bgcolor: '#F4F4F5 !important',
+                    },
                 },
             }}
         />

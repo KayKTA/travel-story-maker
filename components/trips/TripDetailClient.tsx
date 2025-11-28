@@ -1,71 +1,125 @@
 'use client';
 
-import { Box, Container, Typography, Skeleton, Stack, IconButton } from '@mui/material';
-import { Book as JournalIcon, Receipt as ExpenseIcon } from '@mui/icons-material';
+import { useState } from 'react';
+import {
+    Box,
+    Container,
+    Typography,
+    Skeleton,
+    IconButton,
+    Tabs,
+    Tab,
+    Chip,
+    Stack,
+    Grid,
+} from '@mui/material';
+import {
+    ArrowBack as BackIcon,
+    CalendarToday as CalendarIcon,
+    PhotoCamera as PhotoIcon,
+    Videocam as VideoIcon,
+    Book as JournalIcon,
+    Receipt as ExpenseIcon,
+    Map as MapIcon,
+    Dashboard as OverviewIcon,
+    AutoStories as StoriesIcon,
+    Collections as MediaIcon,
+} from '@mui/icons-material';
 import Link from 'next/link';
-import { useTripData, useMultiDisclosure } from '@/lib/hooks';
+import { useTripData, useMultiDisclosure, useBreakpoint } from '@/lib/hooks';
+import { tokens, flexBetween } from '@/styles';
 import { ActionSpeedDial, type SpeedDialActionItem } from '@/components/common';
-import TripTabs from './TripTabs';
+import { formatDateRange } from '@/lib/utils/formatters';
 import JournalForm from '@/components/journal/JournalForm';
 import ExpenseForm from '@/components/expenses/ExpenseForm';
-import TripHeaderBar from './TripHeaderBar';
+
+// Tab panels
+import JournalMapView from './JournalMapView';
+import { ExpenseDashboard } from '@/components/expenses';
+import MediaGallery from '@/components/media/MediaGallery';
+// import TripOverviewDashboard from './TripOverviewDashboard';
 
 interface TripDetailClientProps {
     tripId: string;
 }
 
-// Loading skeleton component
+// Tab configuration
+const TABS = [
+    // { id: 'overview', label: 'Aperçu', icon: <OverviewIcon fontSize="small" /> },
+    { id: 'itinerary', label: 'Itinéraire', icon: <MapIcon fontSize="small" /> },
+    { id: 'media', label: 'Médias', icon: <MediaIcon fontSize="small" /> },
+    { id: 'expenses', label: 'Dépenses', icon: <ExpenseIcon fontSize="small" /> },
+    // { id: 'stories', label: 'Stories', icon: <StoriesIcon fontSize="small" /> },
+];
+
+// Loading skeleton
 function TripDetailSkeleton() {
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-            <Box sx={{ bgcolor: 'primary.main', p: 3, pb: 4 }}>
-                <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
-                <Skeleton variant="text" width={200} height={40} sx={{ mt: 2, bgcolor: 'rgba(0,0,0,0.1)' }} />
-                <Skeleton variant="text" width={120} height={24} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
+            <Box sx={{ bgcolor: 'primary.main', pt: 3, pb: 0 }}>
+                <Container maxWidth="xl">
+                    <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
+                    <Skeleton variant="text" width={250} height={48} sx={{ mt: 2, bgcolor: 'rgba(0,0,0,0.1)' }} />
+                    <Skeleton variant="text" width={150} height={28} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
+                    <Stack direction="row" spacing={1} sx={{ mt: 2, mb: 2 }}>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <Skeleton key={i} variant="rounded" width={100} height={40} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
+                        ))}
+                    </Stack>
+                </Container>
             </Box>
-            <Container maxWidth="lg" sx={{ py: 3 }}>
-                <Skeleton variant="rounded" height={48} sx={{ mb: 3 }} />
-                <Skeleton variant="rounded" height={500} />
+            <Container maxWidth="xl" sx={{ py: 3 }}>
+                <Grid container spacing={3}>
+                    <Grid size={{ xs: 12, md: 8 }}>
+                        <Skeleton variant="rounded" height={400} />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <Skeleton variant="rounded" height={400} />
+                    </Grid>
+                </Grid>
             </Container>
         </Box>
     );
 }
 
-// Error state component
+// Error state
 function TripNotFound() {
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', p: 3, textAlign: 'center' }}>
-            <Typography variant="h6">Voyage non trouvé</Typography>
-            <IconButton component={Link} href="/trips" sx={{ mt: 2 }}>
-                {/* Back */}
-            </IconButton>
+        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', p: 4, textAlign: 'center' }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>Voyage non trouvé</Typography>
+            <Chip
+                component={Link}
+                href="/trips"
+                icon={<BackIcon />}
+                label="Retour aux voyages"
+                clickable
+            />
         </Box>
     );
 }
 
 export default function TripDetailClient({ tripId }: TripDetailClientProps) {
+    const [activeTab, setActiveTab] = useState('itinerary');
+    const { isMobile } = useBreakpoint();
+
     // Data fetching
     const { trip, entries, media, expenses, stories, stats, loading, error, refresh, tripName } =
         useTripData(tripId);
 
-    // Modals/forms state
+    // Modals state
     const modals = useMultiDisclosure(['journal', 'expense']);
 
-    // Speed dial actions
+    // Speed dial actions (mobile)
     const speedDialActions: SpeedDialActionItem[] = [
-        {
-            icon: <JournalIcon />,
-            name: 'Nouvelle étape',
-            onClick: () => modals.open('journal'),
-        },
-        {
-            icon: <ExpenseIcon />,
-            name: 'Dépense',
-            onClick: () => modals.open('expense'),
-        },
+        { icon: <JournalIcon />, name: 'Nouvelle étape', onClick: () => modals.open('journal') },
+        { icon: <ExpenseIcon />, name: 'Dépense', onClick: () => modals.open('expense') },
     ];
 
     // Handlers
+    const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
+        setActiveTab(newValue);
+    };
+
     const handleJournalSubmit = async () => {
         await refresh();
     };
@@ -74,40 +128,280 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
         await refresh();
     };
 
-    // Loading state
-    if (loading) {
-        return <TripDetailSkeleton />;
-    }
-
-    // Error state
-    if (error || !trip) {
-        return <TripNotFound />;
-    }
+    if (loading) return <TripDetailSkeleton />;
+    if (error || !trip) return <TripNotFound />;
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, sm: 4 } }}>
-            {/* Header - Full width */}
-            <TripHeaderBar
-                trip={trip}
-                stats={{ photosCount: stats.photosCount, videosCount: stats.videosCount }}
-                onOpenJournal={() => modals.open('journal')}
-                onOpenExpense={() => modals.open('expense')}
-            />
+        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+            {/* ============================================================ */}
+            {/* HEADER - Full width background, contained content */}
+            {/* ============================================================ */}
+            <Box
+                sx={{
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: tokens.zIndex.header,
+                }}
+            >
+                <Container maxWidth="xl">
+                    {/* Top row: Back button + Actions */}
+                    <Box sx={{ ...flexBetween, pt: { xs: 2, sm: 3 }, pb: 2 }}>
+                        <IconButton
+                            component={Link}
+                            href="/trips"
+                            size="small"
+                            sx={{
+                                color: 'primary.contrastText',
+                                bgcolor: 'rgba(0,0,0,0.1)',
+                                '&:hover': { bgcolor: 'rgba(0,0,0,0.15)' },
+                            }}
+                        >
+                            <BackIcon />
+                        </IconButton>
 
-            {/* Content Contained */}
-            <Container maxWidth="lg" disableGutters sx={{ px: { xs: 0, sm: 2, md: 3 } }}>
-                <TripTabs
-                    trip={trip}
-                    journalEntries={entries}
-                    media={media}
-                    expenses={expenses}
-                    stories={stories}
-                    stats={stats}
-                    onRefresh={refresh}
-                />
+                        {/* Desktop actions */}
+                        <Stack direction="row" spacing={1.5} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                            <Chip
+                                icon={<JournalIcon sx={{ color: 'inherit !important' }} />}
+                                label="Nouvelle étape"
+                                onClick={() => modals.open('journal')}
+                                sx={{
+                                    bgcolor: 'primary.contrastText',
+                                    color: 'primary.main',
+                                    fontWeight: tokens.fontWeights.medium,
+                                    '&:hover': { bgcolor: 'background.paper' },
+                                }}
+                            />
+                            <Chip
+                                icon={<ExpenseIcon sx={{ color: 'inherit !important' }} />}
+                                label="Dépense"
+                                onClick={() => modals.open('expense')}
+                                variant="outlined"
+                                sx={{
+                                    borderColor: 'primary.contrastText',
+                                    color: 'primary.contrastText',
+                                    fontWeight: tokens.fontWeights.medium,
+                                    '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' },
+                                }}
+                            />
+                        </Stack>
+                    </Box>
+
+                    {/* Title + Stats row */}
+                    <Box sx={{ pb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3, flexWrap: 'wrap' }}>
+                            {/* Title section */}
+                            <Box sx={{ flex: 1, minWidth: 200 }}>
+                                <Typography
+                                    variant={isMobile ? 'h4' : 'h3'}
+                                    sx={{ fontWeight: tokens.fontWeights.bold, lineHeight: 1.2 }}
+                                >
+                                    {trip.country}
+                                </Typography>
+                                {trip.city && (
+                                    <Typography
+                                        variant={isMobile ? 'body1' : 'h6'}
+                                        sx={{ opacity: 0.8, fontWeight: tokens.fontWeights.regular, mt: 0.5 }}
+                                    >
+                                        {trip.city}
+                                    </Typography>
+                                )}
+                            </Box>
+
+                            {/* Stats chips - desktop */}
+                            <Stack
+                                direction="row"
+                                spacing={1}
+                                sx={{
+                                    display: { xs: 'none', md: 'flex' },
+                                    alignItems: 'center',
+                                    flexWrap: 'wrap',
+                                    gap: 1,
+                                }}
+                            >
+                                <Chip
+                                    icon={<CalendarIcon sx={{ fontSize: 16 }} />}
+                                    label={formatDateRange(trip.start_date, trip.end_date)}
+                                    size="small"
+                                    sx={{
+                                        bgcolor: 'rgba(0,0,0,0.15)',
+                                        color: 'primary.contrastText',
+                                        fontWeight: tokens.fontWeights.medium,
+                                        '& .MuiChip-icon': { color: 'inherit' },
+                                    }}
+                                />
+                                {stats.photosCount > 0 && (
+                                    <Chip
+                                        icon={<PhotoIcon sx={{ fontSize: 16 }} />}
+                                        label={`${stats.photosCount} photos`}
+                                        size="small"
+                                        sx={{
+                                            bgcolor: 'rgba(0,0,0,0.1)',
+                                            color: 'primary.contrastText',
+                                            '& .MuiChip-icon': { color: 'inherit' },
+                                        }}
+                                    />
+                                )}
+                                {stats.videosCount > 0 && (
+                                    <Chip
+                                        icon={<VideoIcon sx={{ fontSize: 16 }} />}
+                                        label={`${stats.videosCount} vidéos`}
+                                        size="small"
+                                        sx={{
+                                            bgcolor: 'rgba(0,0,0,0.1)',
+                                            color: 'primary.contrastText',
+                                            '& .MuiChip-icon': { color: 'inherit' },
+                                        }}
+                                    />
+                                )}
+                                {stats.totalExpenses > 0 && (
+                                    <Chip
+                                        icon={<ExpenseIcon sx={{ fontSize: 16 }} />}
+                                        label={`${stats.totalExpenses.toFixed(0)}€`}
+                                        size="small"
+                                        sx={{
+                                            bgcolor: 'rgba(0,0,0,0.1)',
+                                            color: 'primary.contrastText',
+                                            '& .MuiChip-icon': { color: 'inherit' },
+                                        }}
+                                    />
+                                )}
+                            </Stack>
+                        </Box>
+
+                        {/* Stats chips - mobile (under title) */}
+                        <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{
+                                display: { xs: 'flex', md: 'none' },
+                                mt: 2,
+                                flexWrap: 'wrap',
+                                gap: 1,
+                            }}
+                        >
+                            <Chip
+                                icon={<CalendarIcon sx={{ fontSize: 14 }} />}
+                                label={formatDateRange(trip.start_date, trip.end_date)}
+                                size="small"
+                                sx={{
+                                    bgcolor: 'rgba(0,0,0,0.15)',
+                                    color: 'primary.contrastText',
+                                    fontSize: '0.75rem',
+                                    '& .MuiChip-icon': { color: 'inherit' },
+                                }}
+                            />
+                            {stats.photosCount > 0 && (
+                                <Chip
+                                    icon={<PhotoIcon sx={{ fontSize: 14 }} />}
+                                    label={stats.photosCount}
+                                    size="small"
+                                    sx={{
+                                        bgcolor: 'rgba(0,0,0,0.1)',
+                                        color: 'primary.contrastText',
+                                        '& .MuiChip-icon': { color: 'inherit' },
+                                    }}
+                                />
+                            )}
+                        </Stack>
+                    </Box>
+
+                    {/* Tabs - integrated in header */}
+                    <Tabs
+                        value={activeTab}
+                        onChange={handleTabChange}
+                        variant={isMobile ? 'scrollable' : 'standard'}
+                        scrollButtons="auto"
+                        sx={{
+                            minHeight: 48,
+                            '& .MuiTabs-indicator': {
+                                bgcolor: 'primary.contrastText',
+                                height: 3,
+                                borderRadius: '3px 3px 0 0',
+                            },
+                            '& .MuiTab-root': {
+                                color: 'rgba(0,0,0,0.6)',
+                                fontWeight: tokens.fontWeights.medium,
+                                minHeight: 48,
+                                textTransform: 'none',
+                                fontSize: '0.9rem',
+                                '&.Mui-selected': {
+                                    color: 'primary.contrastText',
+                                },
+                            },
+                        }}
+                    >
+                        {TABS.map((tab) => (
+                            <Tab
+                                key={tab.id}
+                                value={tab.id}
+                                label={isMobile ? undefined : tab.label}
+                                icon={tab.icon}
+                                iconPosition="start"
+                                sx={{
+                                    minWidth: isMobile ? 'auto' : 120,
+                                    px: isMobile ? 2 : 3,
+                                }}
+                            />
+                        ))}
+                    </Tabs>
+                </Container>
+            </Box>
+
+            {/* ============================================================ */}
+            {/* CONTENT */}
+            {/* ============================================================ */}
+            <Container maxWidth="xl" sx={{ py: 3, pb: { xs: 12, sm: 4 } }}>
+                {/* Overview Tab */}
+                {/* {activeTab === 'overview' && (
+                    <TripOverviewDashboard
+                        trip={trip}
+                        entries={entries}
+                        media={media}
+                        expenses={expenses}
+                        stats={stats}
+                        onOpenJournal={() => modals.open('journal')}
+                        onOpenExpense={() => modals.open('expense')}
+                        onNavigateToTab={setActiveTab}
+                    />
+                )} */}
+
+                {/* Itinerary Tab */}
+                {activeTab === 'itinerary' && (
+                    <JournalMapView
+                        entries={entries}
+                        media={media}
+                        tripLat={trip.lat}
+                        tripLng={trip.lng}
+                    />
+                )}
+
+                {/* Media Tab */}
+                {activeTab === 'media' && (
+                    <MediaGallery
+                        media={media}
+                        tripId={tripId}
+                        // onRefresh={refresh}
+                    />
+                )}
+
+                {/* Expenses Tab */}
+                {activeTab === 'expenses' && (
+                    <ExpenseDashboard
+                        expenses={expenses}
+                        tripId={tripId}
+                        onRefresh={refresh}
+                        onAddExpense={() => modals.open('expense')}
+                    />
+                )}
+
             </Container>
 
-            {/* Forms */}
+            {/* ============================================================ */}
+            {/* FORMS */}
+            {/* ============================================================ */}
             <JournalForm
                 open={modals.isOpen('journal')}
                 onClose={() => modals.close('journal')}

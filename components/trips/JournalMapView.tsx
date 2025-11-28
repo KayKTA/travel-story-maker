@@ -156,7 +156,13 @@ export default function JournalMapView({
             }}
         >
             {/* Map takes full space */}
-            <Box sx={{ height: '100%' }}>
+            <Box
+                sx={{
+                    height: '100%',
+                    position: 'relative',
+                    zIndex: 1,
+                }}
+            >
                 <TripMapView
                     entries={sortedEntries}
                     media={media}
@@ -181,7 +187,7 @@ export default function JournalMapView({
             {/* Timeline panel - overlaid card */}
             {timelinePanel.isOpen ? (
                 <Card
-                    elevation={8}
+                    elevation={0}
                     sx={{
                         position: 'absolute',
                         top: 16,
@@ -191,9 +197,10 @@ export default function JournalMapView({
                         maxWidth: 'calc(100% - 32px)',
                         display: 'flex',
                         flexDirection: 'column',
-                        zIndex: 5,
+                        zIndex: 10,
                         border: 1,
                         borderColor: 'divider',
+                        bgcolor: 'background.paper',
                     }}
                 >
                     {/* Header */}
@@ -240,12 +247,13 @@ export default function JournalMapView({
                         position: 'absolute',
                         top: 16,
                         right: 16,
-                        zIndex: 5,
+                        zIndex: 10,
                         bgcolor: 'background.paper',
                         color: 'text.primary',
                         '&:hover': { bgcolor: 'background.paper' },
                     }}
                 >
+
                     <ListIcon />
                 </Fab>
             )}

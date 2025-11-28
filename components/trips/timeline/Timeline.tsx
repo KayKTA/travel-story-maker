@@ -86,7 +86,7 @@ export default function Timeline({
                                 sx={{
                                     position: 'absolute',
                                     left: -4 - DOT_OFFSET,
-                                    top: 16, // Align with card content
+                                    top: 55, // Align with card content
                                     zIndex: 2,
                                 }}
                             >

@@ -27,24 +27,28 @@ interface TripCardProps {
     trip: TripWithStats;
 }
 
-// Cover image height
-const COVER_HEIGHT = 140;
+const COVER_HEIGHT = 132;
 
 export default function TripCard({ trip }: TripCardProps) {
     const moodData = TRIP_MOODS.find((m) => m.value === trip.mood);
 
     return (
         <Card
-            sx={{
+            variant="outlined"
+            sx={(theme) => ({
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: tokens.transitions.fast,
+                borderRadius: theme.shape.borderRadius,
+                boxShadow: 'none',
+                transition: theme.transitions.create(['box-shadow', 'transform'], {
+                    duration: theme.transitions.duration.shorter,
+                }),
                 '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: 2,
+                    boxShadow: theme.shadows[3],
                 },
-            }}
+            })}
         >
             <CardActionArea
                 component={Link}
@@ -58,27 +62,29 @@ export default function TripCard({ trip }: TripCardProps) {
             >
                 {/* Cover */}
                 <Box
-                    sx={{
+                    sx={(theme) => ({
                         height: COVER_HEIGHT,
                         background: trip.cover_image_url
                             ? `url(${trip.cover_image_url}) center/cover`
-                            : (theme) =>
-                                `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`,
+                            : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 40%, ${theme.palette.background.default} 100%)`,
                         position: 'relative',
-                    }}
+                        borderBottom: `1px solid ${theme.palette.divider}`,
+                    })}
                 >
-                    {/* Overlay with title */}
+                    {/* Overlay title */}
                     <Box
-                        sx={{
+                        sx={(theme) => ({
                             position: 'absolute',
                             inset: 'auto 0 0 0',
                             p: 2,
-                            background: (theme) =>
-                                `linear-gradient(to top, ${alpha(theme.palette.common.black, 0.7)}, transparent)`,
-                        }}
+                            background: `linear-gradient(to top, ${alpha(
+                                theme.palette.common.black,
+                                0.35
+                            )}, transparent)`,
+                        })}
                     >
                         <Typography
-                            variant="h6"
+                            variant="subtitle1"
                             sx={{
                                 color: 'common.white',
                                 fontWeight: tokens.fontWeights.bold,
@@ -89,14 +95,14 @@ export default function TripCard({ trip }: TripCardProps) {
                         {trip.city && (
                             <Typography
                                 variant="body2"
-                                sx={{ color: 'common.white', opacity: 0.85 }}
+                                sx={{ color: 'common.white', opacity: 0.9 }}
                             >
                                 {trip.city}
                             </Typography>
                         )}
                     </Box>
 
-                    {/* Mood Badge */}
+                    {/* Mood badge */}
                     {moodData && (
                         <Chip
                             label={`${moodData.emoji} ${moodData.label}`}
@@ -114,13 +120,13 @@ export default function TripCard({ trip }: TripCardProps) {
 
                 {/* Content */}
                 <CardContent sx={{ flex: 1 }}>
-                    {/* Date row */}
+                    {/* Dates */}
                     <Box
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
-                            mb: 2,
+                            mb: 1.5,
                         }}
                     >
                         <CalendarIcon fontSize="small" color="action" />
@@ -128,7 +134,7 @@ export default function TripCard({ trip }: TripCardProps) {
                             {formatDateRange(trip.start_date, trip.end_date)}
                         </Typography>
                         <Chip
-                            label={`${trip.duration_days} jours`}
+                            label={`${trip.duration_days} j`}
                             size="small"
                             variant="outlined"
                             sx={{ ml: 'auto' }}
@@ -163,7 +169,7 @@ export default function TripCard({ trip }: TripCardProps) {
                             variant="body2"
                             color="text.secondary"
                             sx={{
-                                mt: 2,
+                                mt: 1.5,
                                 ...textTruncate(2),
                             }}
                         >

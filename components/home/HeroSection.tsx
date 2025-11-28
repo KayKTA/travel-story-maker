@@ -1,116 +1,75 @@
-'use client';
+"use client";
 
-import {
-    Box,
-    Button,
-    Container,
-    Stack,
-    Typography,
-} from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import Link from 'next/link';
-import AppHeader from '@/components/layout/AppHeader';
-import HeroPreview from '@/components/home/HeroPreview';
+import { ArrowForward } from "@mui/icons-material";
+import { Box, Typography, Button } from "@mui/material";
 
-export default function HeroSection() {
+export default function Hero() {
     return (
         <Box
-            component="section"
             sx={{
-                position: 'relative',
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                bgcolor: 'background.default',
+                position: "relative",
+                height: "100vh",
+                width: "100%",
+                backgroundImage: "url('/images/hero.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                color: "common.white",
             }}
         >
-            <AppHeader />
-
-            <Container
-                maxWidth="lg"
+            {/* overlay
+            <Box
                 sx={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    pt: { xs: 10, md: 14 },
-                    pb: { xs: 8, md: 10 },
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                        "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.45))",
                 }}
-            >
-                <Box
+            /> */}
+
+            {/* content */}
+            <Box sx={{ position: "relative", zIndex: 1, px: 3, maxWidth: 600 }}>
+                <Typography variant="h2" sx={{ fontWeight: 600, mb: 2 }}>
+                    Crée ton histoire de voyage
+                </Typography>
+
+                <Typography variant="body1" sx={{ mb: 4, opacity: 0.9 }}>
+                    Tes photos, tes souvenirs, ta carte, ton journal. Automatisé, simple, magnifique.
+                </Typography>
+
+                {/* <Button
+                    variant="contained"
+                    size="large"
                     sx={{
-                        display: 'grid',
-                        gridTemplateColumns: { xs: '1fr', md: '1.1fr 1fr' },
-                        columnGap: { xs: 4, md: 8 },
-                        rowGap: { xs: 6, md: 0 },
-                        alignItems: 'center',
-                        width: '100%',
+                        px: 4,
+                        py: 1.5,
+                        fontSize: "1.1rem",
+                        bgcolor: "primary.main",
+                        ":hover": {
+                            bgcolor: "primary.dark",
+                        },
                     }}
                 >
-                    {/* Colonne gauche : texte */}
-                    <Box>
-                        <Typography
-                            variant="h1"
-                            sx={{
-                                fontSize: { xs: '2.4rem', sm: '3rem', md: '3.4rem' },
-                                fontWeight: 800,
-                                lineHeight: 1.05,
-                                letterSpacing: '-0.04em',
-                                mb: 2,
-                            }}
-                        >
-                            Raconte ton voyage
-                            <br />
-                            sans te perdre dans les notes.
-                        </Typography>
-
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                color: 'text.secondary',
-                                maxWidth: 440,
-                                mb: 4,
-                                fontSize: { xs: '0.95rem', md: '1rem' },
-                            }}
-                        >
-                            Travel Story Maker centralise ton journal, tes photos, ton budget
-                            et génère des résumés prêts à partager. Tu profites du voyage,
-                            il s’occupe de la narration.
-                        </Typography>
-
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                            <Button
-                                component={Link}
-                                href="/trips"
-                                variant="contained"
-                                size="large"
-                                endIcon={<ArrowForwardIcon />}
-                                sx={{
-                                    borderRadius: 999,
-                                    px: 4,
-                                    py: 1.5,
-                                }}
-                            >
-                                Commencer un voyage
-                            </Button>
-                            <Button
-                                variant="text"
-                                size="large"
-                                sx={{ px: 2 }}
-                                onClick={() =>
-                                    document
-                                        .getElementById('features')
-                                        ?.scrollIntoView({ behavior: 'smooth' })
-                                }
-                            >
-                                Voir les fonctionnalités
-                            </Button>
-                        </Stack>
-                    </Box>
-
-                    {/* Colonne droite : mini preview, pas de “grosse carte” */}
-                    <HeroPreview />
-                </Box>
-            </Container>
+                    Commencer
+                </Button> */}
+                <Button
+                    // component={Link}
+                    href="/trips"
+                    variant="contained"
+                    size="large"
+                    endIcon={<ArrowForward />}
+                    sx={{
+                        borderRadius: 999,
+                        px: 4,
+                        py: 1.5,
+                    }}
+                >
+                    Commencer un voyage
+                </Button>
+            </Box>
         </Box>
     );
 }

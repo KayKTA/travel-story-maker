@@ -12,56 +12,56 @@ export const tokens = {
     // ---------------------------------------------------------------------------
     colors: {
         primary: {
-            main: '#FACC15',
-            light: '#FDE047',
-            dark: '#EAB308',
-            contrast: '#18181B',
+            main: '#FACC15',   // jaune principal
+            light: '#FDE68A',  // jaune doux
+            dark: '#EAB308',   // jaune plus profond
+            contrast: '#3F3008', // texte sur fond jaune (brun chaud, pas noir)
         },
         secondary: {
-            main: '#64748B',
-            light: '#94A3B8',
-            dark: '#475569',
+            main: '#A1A1AA',   // gris neutre
+            light: '#D4D4D8',
+            dark: '#71717A',
             contrast: '#FFFFFF',
         },
         background: {
-            default: '#FAFAFA',
-            paper: '#FFFFFF',
-            subtle: '#F4F4F5',
+            default: '#FAFAF5', // fond général (crème très clair)
+            paper: '#FFFFFF',   // cartes / surfaces
+            subtle: '#F5F1E5',  // bandeaux, sections
         },
         text: {
-            primary: '#18181B',
-            secondary: '#71717A',
-            disabled: '#A1A1AA',
+            primary: '#3F3008',   // brun chaud (remplace le noir)
+            secondary: '#7A6A3A', // brun plus léger
+            disabled: '#B7A57A',
         },
-        success: '#22C55E',
-        warning: '#F59E0B',
-        error: '#EF4444',
-        info: '#3B82F6',
-        border: '#E4E4E7',
+        success: '#3BAA6C',
+        warning: '#EAB308',
+        error: '#E25A4F',
+        info: '#A1A1AA',
+        border: '#E5E5DC',
     },
 
     // ---------------------------------------------------------------------------
-    // SPACING (in MUI units - 1 unit = 4px)
+    // SPACING (MUI units - 1 unit = 4px)
     // ---------------------------------------------------------------------------
     spacing: {
-        xs: 1,      // 4px
-        sm: 2,      // 8px
-        md: 4,      // 16px
-        lg: 6,      // 24px
-        xl: 8,      // 32px
-        xxl: 12,    // 48px
+        xs: 1,   // 4px
+        sm: 2,   // 8px
+        md: 4,   // 16px
+        lg: 6,   // 24px
+        xl: 8,   // 32px
+        xxl: 12, // 48px
     },
 
     // ---------------------------------------------------------------------------
-    // BORDER RADIUS (in pixels)
+    // BORDER RADIUS (px)
     // ---------------------------------------------------------------------------
     radius: {
-        xs: 2,      // 2px
-        sm: 4,      // 4px
-        md: 6,      // 6px
-        lg: 8,      // 8px
-        xl: 12,     // 12px
-        pill: 50,   // Full rounded
+        xs: 2,
+        sm: 4,
+        md: 6,
+        lg: 8,
+        xl: 12,
+        pill: 999,
         circle: '50%',
     },
 
@@ -69,9 +69,9 @@ export const tokens = {
     // TRANSITIONS
     // ---------------------------------------------------------------------------
     transitions: {
-        fast: '0.15s ease',
-        normal: '0.2s ease',
-        slow: '0.3s ease',
+        fast: '0.15s ease-out',
+        normal: '0.2s ease-out',
+        slow: '0.3s ease-out',
     },
 
     // ---------------------------------------------------------------------------
@@ -93,7 +93,7 @@ export const tokens = {
         regular: 400,
         medium: 500,
         semibold: 600,
-        bold: 600,      // Using 600 for cleaner look
+        bold: 700,
     },
 
     // ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ export const tokens = {
         sm: 18,
         md: 24,
         lg: 32,
-        xl: 48,
+        xl: 40,
     },
 
     // ---------------------------------------------------------------------------
@@ -112,36 +112,36 @@ export const tokens = {
     // ---------------------------------------------------------------------------
     components: {
         card: {
-            borderRadius: 8,
+            borderRadius: 12,
             padding: 20,
-            border: '1px solid #E4E4E7',
+            border: '1px solid #E5E5DC',
         },
         button: {
-            borderRadius: 6,
-            paddingX: 16,
-            paddingY: 8,
+            borderRadius: 999,
+            paddingX: 18,
+            paddingY: 10,
         },
         input: {
-            borderRadius: 6,
+            borderRadius: 10,
             height: 44,
         },
         chip: {
-            borderRadius: 4,
-            height: 28,
+            borderRadius: 999,
+            height: 26,
         },
         header: {
             height: 64,
             mobileHeight: 56,
         },
         drawer: {
-            borderRadius: 12,
+            borderRadius: 16,
             handleWidth: 40,
         },
         timeline: {
             lineWidth: 2,
             dotSize: {
-                default: 28,
-                selected: 32,
+                default: 24,
+                selected: 28,
             },
         },
         thumbnail: {
@@ -155,43 +155,49 @@ export const tokens = {
 };
 
 // ---------------------------------------------------------------------------
-// MOOD COLORS (for journal entries)
+// MOOD COLORS (trip + journal) - palette jaune & neutres
 // ---------------------------------------------------------------------------
 export const moodColors: Record<string, string> = {
-    amazing: '#22C55E',
-    happy: '#4ADE80',
-    good: '#86EFAC',
-    okay: '#FDE047',
-    neutral: '#A1A1AA',
-    tired: '#94A3B8',
-    sad: '#64748B',
-    frustrated: '#F97316',
-    stressed: '#EF4444',
-    sick: '#F87171',
-    adventurous: '#3B82F6',
+    // Trip moods
+    amazing: '#FACC15',
+    great: '#FDE047',
+    good: '#FEF3C7',
+    mixed: '#FCD34D',
+    challenging: '#EAB308',
+    difficult: '#B45309',
+
+    // Journal moods
+    excited: '#FACC15',
+    happy: '#FDE047',
+    tired: '#C4B28A',
+    frustrated: '#D97706',
+    sad: '#8C8A80',
+    adventurous: '#EAB308',
+    inspired: '#FDE68A',
+    chill: '#E5E7EB',
+    neutral: '#D4D4D4',
+    in_love: '#FACC15',
+    underwhelmed: '#A1A1AA',
 };
 
 // ---------------------------------------------------------------------------
-// CATEGORY COLORS (for expenses)
+// CATEGORY COLORS (expenses) - variations de jaune / neutre
 // ---------------------------------------------------------------------------
 export const categoryColors: Record<string, string> = {
-    transport: '#3B82F6',
-    hebergement: '#8B5CF6',
-    nourriture: '#22C55E',
-    activite: '#F59E0B',
-    shopping: '#EC4899',
-    autre: '#64748B',
+    transport: '#FACC15',
+    logement: '#FDE047',
+    food: '#FCD34D',
+    activite: '#EAB308',
+    shopping: '#FBBF24',
+    autre: '#D4D4D4',
 };
 
 // ---------------------------------------------------------------------------
 // HELPER FUNCTIONS
 // ---------------------------------------------------------------------------
 
-/**
- * Create a color with alpha transparency
- */
+/** Create a color with alpha transparency */
 export function alpha(color: string, opacity: number): string {
-    // For hex colors, convert to rgba
     if (color.startsWith('#')) {
         const hex = color.slice(1);
         const r = parseInt(hex.slice(0, 2), 16);

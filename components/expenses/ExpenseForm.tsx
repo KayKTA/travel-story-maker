@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
     Dialog,
-    DialogTitle,
     DialogContent,
-    DialogActions,
     Button,
     TextField,
     Grid,
@@ -19,8 +17,6 @@ import {
     InputAdornment,
     IconButton,
     Typography,
-    useTheme,
-    useMediaQuery,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -35,6 +31,8 @@ import {
 } from '@/types/expense';
 import { validateExpense } from '@/lib/utils/validators';
 import { getSupabaseClient } from '@/lib/supabase/client';
+import { useBreakpoint } from '@/lib/hooks';
+import { tokens, flexBetween } from '@/styles';
 
 interface ExpenseFormProps {
     open: boolean;
@@ -46,7 +44,7 @@ interface ExpenseFormProps {
     isEditing?: boolean;
 }
 
-const emptyFormData: ExpenseFormData = {
+const EMPTY_FORM_DATA: ExpenseFormData = {
     trip_id: '',
     date: new Date().toISOString().split('T')[0],
     amount: 0,
@@ -57,13 +55,7 @@ const emptyFormData: ExpenseFormData = {
 };
 
 // Z-index for dropdowns
-const selectMenuProps = {
-    sx: { zIndex: 1500 },
-};
-
-const datePickerPopperProps = {
-    sx: { zIndex: 1500 },
-};
+const MENU_PROPS = { sx: { zIndex: tokens.zIndex.tooltip } };
 
 export default function ExpenseForm({
     open,
@@ -74,11 +66,10 @@ export default function ExpenseForm({
     initialData,
     isEditing = false,
 }: ExpenseFormProps) {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { isMobile } = useBreakpoint();
 
     const [formData, setFormData] = useState<ExpenseFormData>({
-        ...emptyFormData,
+        ...EMPTY_FORM_DATA,
         trip_id: tripId,
     });
     const [loading, setLoading] = useState(false);
@@ -98,16 +89,13 @@ export default function ExpenseForm({
                     notes: initialData.notes || '',
                 });
             } else {
-                setFormData({
-                    ...emptyFormData,
-                    trip_id: tripId,
-                });
+                setFormData({ ...EMPTY_FORM_DATA, trip_id: tripId });
             }
             setErrors([]);
         }
     }, [open, initialData, tripId]);
 
-    const handleChange = (field: keyof ExpenseFormData, value: unknown) => {
+    const handleChange = <K extends keyof ExpenseFormData>(field: K, value: ExpenseFormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         setErrors([]);
     };
@@ -162,28 +150,26 @@ export default function ExpenseForm({
             maxWidth="sm"
             fullWidth
             fullScreen={isMobile}
-            sx={{ zIndex: 1300 }}
+            sx={{ zIndex: tokens.zIndex.modal }}
             PaperProps={{
                 sx: {
-                    borderRadius: isMobile ? 0 : 3,
+                    borderRadius: isMobile ? 0 : tokens.radius.lg,
                 },
             }}
         >
             {/* Header */}
             <Box
                 sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    ...flexBetween,
                     p: 2,
                     borderBottom: 1,
                     borderColor: 'divider',
-                    bgcolor: 'warning.main',
-                    color: 'white',
+                    bgcolor: 'secondary.main',
+                    color: 'secondary.contrastText',
                 }}
             >
                 <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h6" sx={{ fontWeight: tokens.fontWeights.semibold }}>
                         {isEditing ? 'Modifier la dépense' : 'Nouvelle dépense'}
                     </Typography>
                     {tripName && (
@@ -192,7 +178,11 @@ export default function ExpenseForm({
                         </Typography>
                     )}
                 </Box>
-                <IconButton onClick={handleClose} disabled={loading} sx={{ color: 'white' }}>
+                <IconButton
+                    onClick={handleClose}
+                    disabled={loading}
+                    sx={{ color: 'secondary.contrastText' }}
+                >
                     <CloseIcon />
                 </IconButton>
             </Box>
@@ -208,16 +198,14 @@ export default function ExpenseForm({
                             </Alert>
                         )}
 
-                        {/* Amount & Currency - Most important first */}
+                        {/* Amount & Currency */}
                         <Grid container spacing={2}>
-                            <Grid size={{ xs: 12, sm: 8 }}>
+                            <Grid size={{ xs: 8 }}>
                                 <TextField
                                     label="Montant"
                                     type="number"
                                     value={formData.amount || ''}
-                                    onChange={(e) =>
-                                        handleChange('amount', parseFloat(e.target.value) || 0)
-                                    }
+                                    onChange={(e) => handleChange('amount', parseFloat(e.target.value) || 0)}
                                     required
                                     fullWidth
                                     inputProps={{ min: 0, step: '0.01' }}
@@ -230,14 +218,14 @@ export default function ExpenseForm({
                                     }}
                                 />
                             </Grid>
-                            <Grid size={{ xs: 12, sm: 4 }}>
+                            <Grid size={{ xs: 4 }}>
                                 <FormControl fullWidth>
                                     <InputLabel>Devise</InputLabel>
                                     <Select
                                         value={formData.currency}
                                         label="Devise"
                                         onChange={(e) => handleChange('currency', e.target.value)}
-                                        MenuProps={selectMenuProps}
+                                        MenuProps={MENU_PROPS}
                                     >
                                         {CURRENCIES.map((currency) => (
                                             <MenuItem key={currency.code} value={currency.code}>
@@ -255,10 +243,8 @@ export default function ExpenseForm({
                             <Select
                                 value={formData.category}
                                 label="Catégorie"
-                                onChange={(e) =>
-                                    handleChange('category', e.target.value as ExpenseCategory)
-                                }
-                                MenuProps={selectMenuProps}
+                                onChange={(e) => handleChange('category', e.target.value as ExpenseCategory)}
+                                MenuProps={MENU_PROPS}
                             >
                                 {EXPENSE_CATEGORIES.map((cat) => (
                                     <MenuItem key={cat.value} value={cat.value}>
@@ -273,14 +259,11 @@ export default function ExpenseForm({
                             label="Date"
                             value={formData.date ? new Date(formData.date) : null}
                             onChange={(date) =>
-                                handleChange(
-                                    'date',
-                                    date ? date.toISOString().split('T')[0] : ''
-                                )
+                                handleChange('date', date ? date.toISOString().split('T')[0] : '')
                             }
                             slotProps={{
                                 textField: { fullWidth: true, required: true },
-                                popper: datePickerPopperProps,
+                                popper: MENU_PROPS,
                             }}
                         />
 
@@ -315,8 +298,8 @@ export default function ExpenseForm({
                     onClick={handleSubmit}
                     disabled={loading || !formData.amount}
                     startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
-                    color="warning"
-                    sx={{ py: 1.5, borderRadius: 2 }}
+                    color="secondary"
+                    sx={{ py: 1.5, borderRadius: tokens.radius.md }}
                 >
                     {loading ? 'Enregistrement...' : isEditing ? 'Enregistrer' : 'Ajouter la dépense'}
                 </Button>

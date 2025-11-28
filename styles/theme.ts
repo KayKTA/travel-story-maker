@@ -135,7 +135,7 @@ const spacing = 4;
 
 // Border radius - Subtle rounded corners
 const shape = {
-    borderRadius: 8,
+    borderRadius: 6,
 };
 
 // =============================================================================
@@ -199,7 +199,7 @@ const components = {
         },
         styleOverrides: {
             root: {
-                borderRadius: 12,
+                borderRadius: 8,
                 border: `1px solid ${colors.border}`,
                 transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
                 '&:hover': {
@@ -227,7 +227,7 @@ const components = {
         },
         styleOverrides: {
             root: {
-                borderRadius: 8,
+                borderRadius: 6,
                 padding: '8px 16px',
                 fontWeight: 500,
                 transition: 'all 0.15s ease',
@@ -263,7 +263,7 @@ const components = {
     MuiIconButton: {
         styleOverrides: {
             root: {
-                borderRadius: 8,
+                borderRadius: 6,
                 transition: 'background-color 0.15s ease',
                 '&:hover': {
                     backgroundColor: colors.background.subtle,
@@ -283,7 +283,7 @@ const components = {
     MuiOutlinedInput: {
         styleOverrides: {
             root: {
-                borderRadius: 8,
+                borderRadius: 6,
                 backgroundColor: colors.background.paper,
                 '& .MuiOutlinedInput-notchedOutline': {
                     borderColor: colors.border,
@@ -374,7 +374,7 @@ const components = {
     MuiDialog: {
         styleOverrides: {
             paper: {
-                borderRadius: 16,
+                borderRadius: 12,
                 border: `1px solid ${colors.border}`,
                 boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
             },
@@ -422,7 +422,7 @@ const components = {
     MuiMenu: {
         styleOverrides: {
             paper: {
-                borderRadius: 8,
+                borderRadius: 6,
                 border: `1px solid ${colors.border}`,
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
             },
@@ -527,7 +527,7 @@ const components = {
     MuiAlert: {
         styleOverrides: {
             root: {
-                borderRadius: 8,
+                borderRadius: 6,
                 border: '1px solid',
             },
             standardSuccess: {
@@ -643,7 +643,7 @@ let theme = createTheme({
     typography,
     spacing,
     shape,
-    components,
+    components: components as any,
 });
 
 // Apply responsive font sizes

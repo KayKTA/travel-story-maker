@@ -53,14 +53,14 @@ export const tokens = {
     },
 
     // ---------------------------------------------------------------------------
-    // BORDER RADIUS (in MUI units - 1 unit = 4px)
+    // BORDER RADIUS (in pixels)
     // ---------------------------------------------------------------------------
     radius: {
-        xs: 1,      // 4px
-        sm: 2,      // 8px
-        md: 3,      // 12px
-        lg: 4,      // 16px
-        xl: 6,      // 24px
+        xs: 2,      // 2px
+        sm: 4,      // 4px
+        md: 6,      // 6px
+        lg: 8,      // 8px
+        xl: 12,     // 12px
         pill: 50,   // Full rounded
         circle: '50%',
     },
@@ -112,21 +112,21 @@ export const tokens = {
     // ---------------------------------------------------------------------------
     components: {
         card: {
-            borderRadius: 12,
+            borderRadius: 8,
             padding: 20,
             border: '1px solid #E4E4E7',
         },
         button: {
-            borderRadius: 8,
+            borderRadius: 6,
             paddingX: 16,
             paddingY: 8,
         },
         input: {
-            borderRadius: 8,
+            borderRadius: 6,
             height: 44,
         },
         chip: {
-            borderRadius: 6,
+            borderRadius: 4,
             height: 28,
         },
         header: {
@@ -134,7 +134,7 @@ export const tokens = {
             mobileHeight: 56,
         },
         drawer: {
-            borderRadius: 16,
+            borderRadius: 12,
             handleWidth: 40,
         },
         timeline: {

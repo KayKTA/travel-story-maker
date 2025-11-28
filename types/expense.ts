@@ -35,12 +35,21 @@ export interface ExpenseFormData {
     notes?: string;
 }
 
+// types/expenses.ts (ou où tu les as)
+
 export type ExpenseCategory =
-    | 'transport'
     | 'logement'
+    | 'transport'
     | 'food'
     | 'activite'
+    | 'sorties'
     | 'shopping'
+    | 'blanchisserie'
+    | 'internet'
+    | 'banque'
+    | 'equipement'
+    | 'sante'
+    | 'general'
     | 'autre';
 
 export const EXPENSE_CATEGORIES: {
@@ -49,16 +58,24 @@ export const EXPENSE_CATEGORIES: {
     emoji: string;
     color: string;
 }[] = [
-        { value: 'transport', label: 'Transport', emoji: '✈️', color: '#3B82F6' },
-        { value: 'logement', label: 'Logement', emoji: '🏨', color: '#8B5CF6' },
-        { value: 'food', label: 'Nourriture', emoji: '🍽️', color: '#F59E0B' },
-        { value: 'activite', label: 'Activité', emoji: '🎭', color: '#10B981' },
-        { value: 'shopping', label: 'Shopping', emoji: '🛍️', color: '#EC4899' },
-        { value: 'autre', label: 'Autre', emoji: '📦', color: '#6B7280' },
-    ];
+    { value: 'logement',      label: 'Hébergement',              emoji: '🏨', color: '#8B5CF6' },
+    { value: 'transport',     label: 'Transports',               emoji: '🚌', color: '#3B82F6' },
+    { value: 'food',          label: 'Nourriture',               emoji: '🍽️', color: '#F59E0B' },
+    { value: 'activite',      label: 'Activités / Visites',      emoji: '🎭', color: '#10B981' },
+    { value: 'sorties',       label: 'Boissons / Sorties',       emoji: '🍹', color: '#EC4899' },
+    { value: 'shopping',      label: 'Achats / Souvenirs',       emoji: '🛍️', color: '#F97316' },
+    { value: 'blanchisserie', label: 'Blanchisserie',            emoji: '🧺', color: '#06B6D4' },
+    { value: 'internet',      label: 'Internet / Téléphone',     emoji: '📶', color: '#0EA5E9' },
+    { value: 'banque',        label: 'Frais bancaires',          emoji: '🏦', color: '#6366F1' },
+    { value: 'equipement',    label: 'Équipements',              emoji: '🎒', color: '#84CC16' },
+    { value: 'sante',         label: 'Frais de santé',           emoji: '🩺', color: '#DC2626' },
+    { value: 'general',       label: 'Général',                  emoji: '📂', color: '#9CA3AF' },
+    { value: 'autre',         label: 'Autre',                    emoji: '📦', color: '#6B7280' },
+];
 
 export const CURRENCIES = [
     { code: 'EUR', symbol: '€', name: 'Euro' },
+    { code: 'BRL', symbol: 'R$', name: 'Real Brésilien' },
     { code: 'USD', symbol: '$', name: 'Dollar US' },
     { code: 'GBP', symbol: '£', name: 'Livre Sterling' },
     { code: 'ARS', symbol: '$', name: 'Peso Argentin' },

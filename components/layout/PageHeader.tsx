@@ -1,9 +1,20 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Box, Typography, Breadcrumbs, Button, Skeleton, IconButton } from '@mui/material';
-import { NavigateNext as NavigateNextIcon, ArrowBack as BackIcon } from '@mui/icons-material';
+import {
+    Box,
+    Typography,
+    Breadcrumbs,
+    Button,
+    Skeleton,
+    IconButton,
+} from '@mui/material';
+import {
+    NavigateNext as NavigateNextIcon,
+    ArrowBack as BackIcon,
+} from '@mui/icons-material';
 import Link from 'next/link';
+import { tokens, flexBetween } from '@/styles';
 
 interface BreadcrumbItem {
     label: string;
@@ -44,10 +55,10 @@ export default function PageHeader({
     return (
         <Box
             sx={{
-                px: { xs: 2, sm: 3, md: 4 },
-                py: { xs: 2, sm: 3 },
-                bgcolor: '#1A1A1A',
-                color: '#F5B82E',
+                px: { xs: 3, sm: 4, md: 5 },
+                py: { xs: 3, sm: 4 },
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
             }}
         >
             {/* Back button */}
@@ -57,11 +68,11 @@ export default function PageHeader({
                     href={backHref}
                     size="small"
                     sx={{
-                        mb: 1,
+                        mb: 1.5,
                         ml: -1,
-                        color: '#F5B82E',
-                        bgcolor: 'rgba(245, 184, 46, 0.1)',
-                        '&:hover': { bgcolor: 'rgba(245, 184, 46, 0.2)' },
+                        color: 'primary.contrastText',
+                        bgcolor: 'rgba(0, 0, 0, 0.1)',
+                        '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.15)' },
                     }}
                 >
                     <BackIcon />
@@ -71,8 +82,13 @@ export default function PageHeader({
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
                 <Breadcrumbs
-                    separator={<NavigateNextIcon fontSize="small" sx={{ color: 'rgba(245, 184, 46, 0.5)' }} />}
-                    sx={{ mb: 1.5 }}
+                    separator={
+                        <NavigateNextIcon
+                            fontSize="small"
+                            sx={{ color: 'rgba(0, 0, 0, 0.4)' }}
+                        />
+                    }
+                    sx={{ mb: 2 }}
                 >
                     {breadcrumbs.map((item, index) => {
                         const isLast = index === breadcrumbs.length - 1;
@@ -81,9 +97,9 @@ export default function PageHeader({
                             return (
                                 <Typography
                                     key={index}
-                                    color={isLast ? '#F5B82E' : 'rgba(245, 184, 46, 0.7)'}
+                                    color={isLast ? 'primary.contrastText' : 'rgba(0, 0, 0, 0.6)'}
                                     variant="body2"
-                                    sx={{ fontWeight: isLast ? 700 : 500 }}
+                                    sx={{ fontWeight: isLast ? tokens.fontWeights.semibold : tokens.fontWeights.medium }}
                                 >
                                     {item.label}
                                 </Typography>
@@ -91,18 +107,14 @@ export default function PageHeader({
                         }
 
                         return (
-                            <Link
-                                key={index}
-                                href={item.href}
-                                style={{ textDecoration: 'none' }}
-                            >
+                            <Link key={index} href={item.href} style={{ textDecoration: 'none' }}>
                                 <Typography
                                     variant="body2"
                                     sx={{
-                                        color: 'rgba(245, 184, 46, 0.7)',
-                                        fontWeight: 500,
+                                        color: 'rgba(0, 0, 0, 0.6)',
+                                        fontWeight: tokens.fontWeights.medium,
                                         '&:hover': {
-                                            color: '#F5B82E',
+                                            color: 'primary.contrastText',
                                         },
                                     }}
                                 >
@@ -127,22 +139,34 @@ export default function PageHeader({
                 <Box>
                     {loading ? (
                         <>
-                            <Skeleton variant="text" width={250} height={40} sx={{ bgcolor: 'rgba(245, 184, 46, 0.1)' }} />
-                            {subtitle && <Skeleton variant="text" width={180} height={24} sx={{ bgcolor: 'rgba(245, 184, 46, 0.1)' }} />}
+                            <Skeleton
+                                variant="text"
+                                width={250}
+                                height={40}
+                                sx={{ bgcolor: 'rgba(0, 0, 0, 0.1)' }}
+                            />
+                            {subtitle && (
+                                <Skeleton
+                                    variant="text"
+                                    width={180}
+                                    height={24}
+                                    sx={{ bgcolor: 'rgba(0, 0, 0, 0.1)' }}
+                                />
+                            )}
                         </>
                     ) : (
                         <>
                             <Typography
-                                variant="h4"
+                                variant="h3"
                                 component="h1"
-                                sx={{ fontWeight: 800, color: '#F5B82E' }}
+                                sx={{ fontWeight: tokens.fontWeights.bold, color: 'primary.contrastText' }}
                             >
                                 {title}
                             </Typography>
                             {subtitle && (
                                 <Typography
                                     variant="body1"
-                                    sx={{ mt: 0.5, color: 'rgba(245, 184, 46, 0.7)' }}
+                                    sx={{ mt: 0.5, color: 'rgba(0, 0, 0, 0.7)' }}
                                 >
                                     {subtitle}
                                 </Typography>
@@ -160,14 +184,14 @@ export default function PageHeader({
                                 startIcon={secondaryAction.icon}
                                 onClick={secondaryAction.onClick}
                                 sx={{
-                                    borderColor: '#F5B82E',
-                                    color: '#F5B82E',
-                                    borderWidth: 2,
-                                    fontWeight: 700,
+                                    borderColor: 'primary.contrastText',
+                                    color: 'primary.contrastText',
+                                    borderWidth: 1.5,
+                                    fontWeight: tokens.fontWeights.medium,
                                     '&:hover': {
-                                        borderColor: '#F5B82E',
-                                        bgcolor: 'rgba(245, 184, 46, 0.1)',
-                                        borderWidth: 2,
+                                        borderColor: 'primary.contrastText',
+                                        bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        borderWidth: 1.5,
                                     },
                                 }}
                                 {...(secondaryAction.href && {
@@ -184,10 +208,10 @@ export default function PageHeader({
                                 startIcon={action.icon}
                                 onClick={action.onClick}
                                 sx={{
-                                    bgcolor: '#F5B82E',
-                                    color: '#1A1A1A',
-                                    fontWeight: 700,
-                                    '&:hover': { bgcolor: '#FFD466' },
+                                    bgcolor: 'primary.contrastText',
+                                    color: 'primary.main',
+                                    fontWeight: tokens.fontWeights.medium,
+                                    '&:hover': { bgcolor: 'background.paper' },
                                 }}
                                 {...(action.href && {
                                     component: Link,
@@ -202,7 +226,7 @@ export default function PageHeader({
             </Box>
 
             {/* Additional content */}
-            {children && <Box sx={{ mt: 2 }}>{children}</Box>}
+            {children && <Box sx={{ mt: 3 }}>{children}</Box>}
         </Box>
     );
 }

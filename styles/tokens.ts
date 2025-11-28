@@ -181,15 +181,22 @@ export const moodColors: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// CATEGORY COLORS (expenses) - variations de jaune / neutre
+// CATEGORY COLORS (for expenses) - Pastel harmonious palette
 // ---------------------------------------------------------------------------
 export const categoryColors: Record<string, string> = {
-    transport: '#FACC15',
-    logement: '#FDE047',
-    food: '#FCD34D',
-    activite: '#EAB308',
-    shopping: '#FBBF24',
-    autre: '#D4D4D4',
+    logement: '#C4B5FD',      // Soft purple
+    transport: '#93C5FD',     // Soft blue
+    food: '#FCD34D',          // Soft yellow/gold
+    activite: '#6EE7B7',      // Soft mint green
+    sorties: '#F9A8D4',       // Soft pink
+    shopping: '#FDBA74',      // Soft orange
+    blanchisserie: '#67E8F9', // Soft cyan
+    internet: '#7DD3FC',      // Soft sky blue
+    banque: '#A5B4FC',        // Soft indigo
+    equipement: '#BEF264',    // Soft lime
+    sante: '#FCA5A5',         // Soft red
+    general: '#D1D5DB',       // Soft gray
+    autre: '#E5E7EB',         // Light gray
 };
 
 // ---------------------------------------------------------------------------

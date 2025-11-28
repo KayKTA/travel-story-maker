@@ -5,7 +5,7 @@
 export interface Expense {
     id: string;
     trip_id: string;
-    date: string; // ISO date string
+    expense_date: string; // ISO date string
     amount: number;
     currency: string;
     category: ExpenseCategory;
@@ -73,6 +73,17 @@ export const EXPENSE_CATEGORIES: {
     { value: 'autre',         label: 'Autre',                    emoji: '📦', color: '#6B7280' },
 ];
 
+export const EXPENSE_CATEGORIES_MAP: Record<ExpenseCategory, { label: string; emoji: string; color: string }> = EXPENSE_CATEGORIES.reduce(
+    (acc, category) => {
+        acc[category.value] = {
+            label: category.label,
+            emoji: category.emoji,
+            color: category.color,
+        };
+        return acc;
+    },
+    {} as Record<ExpenseCategory, { label: string; emoji: string; color: string }>
+);
 export const CURRENCIES = [
     { code: 'EUR', symbol: '€', name: 'Euro' },
     { code: 'BRL', symbol: 'R$', name: 'Real Brésilien' },

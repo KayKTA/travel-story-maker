@@ -16,6 +16,14 @@ export interface Trip {
     created_at: string;
     updated_at: string;
 }
+export interface TripStats {
+    journalCount: number;
+    photosCount: number;
+    videosCount: number;
+    totalExpenses: number;
+    storiesCount: number;
+    entriesWithGps: number;
+}
 
 export interface TripWithStats extends Trip {
     journal_entries_count: number;

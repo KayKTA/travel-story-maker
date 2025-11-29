@@ -153,7 +153,7 @@ export default function ExpenseForm({
             sx={{ zIndex: tokens.zIndex.modal }}
             PaperProps={{
                 sx: {
-                    borderRadius: isMobile ? 0 : tokens.radius.lg,
+                    borderRadius: isMobile ? 0 : 2,
                 },
             }}
         >

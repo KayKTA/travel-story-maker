@@ -1,5 +1,5 @@
 // ============================================
-// Types Story (Travel Story Maker)
+// Types Story (Travel Story)
 // ============================================
 
 export interface Story {

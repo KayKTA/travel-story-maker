@@ -444,7 +444,7 @@ export default function JournalForm({
             fullWidth
             PaperProps={{
                 sx: {
-                    borderRadius: isMobile ? 0 : 3,
+                    borderRadius: isMobile ? 0 : 2,
                     maxHeight: isMobile ? '100%' : '90vh',
                 },
             }}
@@ -497,7 +497,7 @@ export default function JournalForm({
                                     p: 4,
                                     textAlign: 'center',
                                     cursor: 'pointer',
-                                    border: '2px dashed',
+                                    border: '2px solid',
                                     borderColor: 'primary.main',
                                     borderRadius: 2,
                                     bgcolor: 'background.paper',
@@ -615,7 +615,7 @@ export default function JournalForm({
                                                 paddingTop: '100%',
                                                 position: 'relative',
                                                 borderRadius: 1,
-                                                border: '2px dashed',
+                                                border: '2px solid',
                                                 borderColor: 'grey.300',
                                                 cursor: 'pointer',
                                                 '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.50' },
@@ -723,7 +723,8 @@ export default function JournalForm({
                                     color={isRecording ? 'error' : 'primary'}
                                     startIcon={isRecording ? <MicOffIcon /> : <MicIcon />}
                                     onClick={isRecording ? stopRecording : startRecording}
-                                    disabled={audioTranscribing}
+                                    disabled
+                                    // disabled={audioTranscribing}
                                 >
                                     {isRecording ? 'Arrêter' : 'Dicter'}
                                 </Button>

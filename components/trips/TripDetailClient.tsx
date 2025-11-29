@@ -37,7 +37,7 @@ import ExpenseForm from '@/components/expenses/ExpenseForm';
 import JournalMapView from './JournalMapView';
 import { ExpenseDashboard } from '@/components/expenses';
 import MediaGallery from '@/components/media/MediaGallery';
-// import TripOverviewDashboard from './TripOverviewDashboard';
+// import CoverImageUpload from './CoverImageUpload';
 
 interface TripDetailClientProps {
     tripId: string;
@@ -60,9 +60,9 @@ function TripDetailSkeleton() {
                 <Container maxWidth="xl">
                     <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
                     <Skeleton variant="text" width={250} height={48} sx={{ mt: 2, bgcolor: 'rgba(0,0,0,0.1)' }} />
-                    <Skeleton variant="text" width={150} height={28} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
+                    {/* <Skeleton variant="text" width={150} height={28} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} /> */}
                     <Stack direction="row" spacing={1} sx={{ mt: 2, mb: 2 }}>
-                        {[1, 2, 3, 4, 5].map((i) => (
+                        {[1, 2, 3].map((i) => (
                             <Skeleton key={i} variant="rounded" width={100} height={40} sx={{ bgcolor: 'rgba(0,0,0,0.1)' }} />
                         ))}
                     </Stack>
@@ -70,11 +70,11 @@ function TripDetailSkeleton() {
             </Box>
             <Container maxWidth="xl" sx={{ py: 3 }}>
                 <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, md: 8 }}>
-                        <Skeleton variant="rounded" height={400} />
-                    </Grid>
                     <Grid size={{ xs: 12, md: 4 }}>
-                        <Skeleton variant="rounded" height={400} />
+                        <Skeleton variant="rounded" height={600} />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 8 }}>
+                        <Skeleton variant="rounded" height={600} />
                     </Grid>
                 </Grid>
             </Container>
@@ -134,15 +134,20 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
             {/* ============================================================ */}
-            {/* HEADER - Full width background, contained content */}
+            {/* HEADER - Full width background with optional cover image */}
             {/* ============================================================ */}
             <Box
                 sx={{
                     bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
+                    color: 'background.default',
                     position: 'sticky',
                     top: 0,
                     zIndex: tokens.zIndex.header,
+                    backgroundImage: trip.cover_image_url
+                        ? `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${trip.cover_image_url})`
+                        : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                 }}
             >
                 <Container maxWidth="xl">
@@ -153,9 +158,9 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                             href="/trips"
                             size="small"
                             sx={{
-                                color: 'primary.contrastText',
-                                bgcolor: 'rgba(0,0,0,0.1)',
-                                '&:hover': { bgcolor: 'rgba(0,0,0,0.15)' },
+                                color: 'background.default',
+                                bgcolor: 'rgba(0,0,0,0.2)',
+                                '&:hover': { bgcolor: 'rgba(0,0,0,0.3)' },
                             }}
                         >
                             <BackIcon />
@@ -163,12 +168,18 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
 
                         {/* Desktop actions */}
                         <Stack direction="row" spacing={1.5} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                            {/* <CoverImageUpload
+                                tripId={tripId}
+                                currentImageUrl={trip.cover_image_url}
+                                onUploadComplete={refresh}
+                                onRemove={refresh}
+                            /> */}
                             <Chip
                                 icon={<JournalIcon sx={{ color: 'inherit !important' }} />}
                                 label="Nouvelle étape"
                                 onClick={() => modals.open('journal')}
                                 sx={{
-                                    bgcolor: 'primary.contrastText',
+                                    bgcolor: 'background.default',
                                     color: 'primary.main',
                                     fontWeight: tokens.fontWeights.medium,
                                     '&:hover': { bgcolor: 'background.paper' },
@@ -180,8 +191,8 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                 onClick={() => modals.open('expense')}
                                 variant="outlined"
                                 sx={{
-                                    borderColor: 'primary.contrastText',
-                                    color: 'primary.contrastText',
+                                    borderColor: 'background.default',
+                                    color: 'background.default',
                                     fontWeight: tokens.fontWeights.medium,
                                     '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' },
                                 }}
@@ -226,8 +237,9 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     label={formatDateRange(trip.start_date, trip.end_date)}
                                     size="small"
                                     sx={{
-                                        bgcolor: 'rgba(0,0,0,0.15)',
-                                        color: 'primary.contrastText',
+                                        bgcolor: trip.cover_image_url ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.15)',
+                                        backdropFilter: trip.cover_image_url ? 'blur(4px)' : undefined,
+                                        color: 'background.default',
                                         fontWeight: tokens.fontWeights.medium,
                                         '& .MuiChip-icon': { color: 'inherit' },
                                     }}
@@ -238,8 +250,9 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                         label={`${stats.photosCount} photos`}
                                         size="small"
                                         sx={{
-                                            bgcolor: 'rgba(0,0,0,0.1)',
-                                            color: 'primary.contrastText',
+                                            bgcolor: trip.cover_image_url ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)',
+                                            backdropFilter: trip.cover_image_url ? 'blur(4px)' : undefined,
+                                            color: 'background.default',
                                             '& .MuiChip-icon': { color: 'inherit' },
                                         }}
                                     />
@@ -250,8 +263,9 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                         label={`${stats.videosCount} vidéos`}
                                         size="small"
                                         sx={{
-                                            bgcolor: 'rgba(0,0,0,0.1)',
-                                            color: 'primary.contrastText',
+                                            bgcolor: trip.cover_image_url ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)',
+                                            backdropFilter: trip.cover_image_url ? 'blur(4px)' : undefined,
+                                            color: 'background.default',
                                             '& .MuiChip-icon': { color: 'inherit' },
                                         }}
                                     />
@@ -262,8 +276,9 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                         label={`${stats.totalExpenses.toFixed(0)}€`}
                                         size="small"
                                         sx={{
-                                            bgcolor: 'rgba(0,0,0,0.1)',
-                                            color: 'primary.contrastText',
+                                            bgcolor: trip.cover_image_url ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)',
+                                            backdropFilter: trip.cover_image_url ? 'blur(4px)' : undefined,
+                                            color: 'background.default',
                                             '& .MuiChip-icon': { color: 'inherit' },
                                         }}
                                     />
@@ -288,7 +303,7 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                 size="small"
                                 sx={{
                                     bgcolor: 'rgba(0,0,0,0.15)',
-                                    color: 'primary.contrastText',
+                                    color: 'background.default',
                                     fontSize: '0.75rem',
                                     '& .MuiChip-icon': { color: 'inherit' },
                                 }}
@@ -300,7 +315,7 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     size="small"
                                     sx={{
                                         bgcolor: 'rgba(0,0,0,0.1)',
-                                        color: 'primary.contrastText',
+                                        color: 'background.default',
                                         '& .MuiChip-icon': { color: 'inherit' },
                                     }}
                                 />
@@ -317,18 +332,18 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                         sx={{
                             minHeight: 48,
                             '& .MuiTabs-indicator': {
-                                bgcolor: 'primary.contrastText',
+                                bgcolor: 'background.default',
                                 height: 3,
                                 borderRadius: '3px 3px 0 0',
                             },
                             '& .MuiTab-root': {
-                                color: 'rgba(0,0,0,0.6)',
+                                color: 'background.default',
                                 fontWeight: tokens.fontWeights.medium,
                                 minHeight: 48,
                                 textTransform: 'none',
                                 fontSize: '0.9rem',
                                 '&.Mui-selected': {
-                                    color: 'primary.contrastText',
+                                    color: 'background.default',
                                 },
                             },
                         }}
@@ -383,7 +398,6 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                     <MediaGallery
                         media={media}
                         tripId={tripId}
-                        // onRefresh={refresh}
                     />
                 )}
 

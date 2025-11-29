@@ -46,7 +46,7 @@ export default function TripList({ trips, onRefresh }: TripListProps) {
 
     return (
         <Grid container spacing={3}>
-            {trips.map((trip) => (
+            {trips.filter((trip) => trip.country !== "Multi-country" ).map((trip) => (
                 <Grid key={trip.id} size={{ xs: 12, sm: 6, lg: 4 }}>
                     <TripCard trip={trip} />
                 </Grid>

@@ -11,7 +11,6 @@ import {
     CardContent,
     Chip,
     Stack,
-    Divider,
 } from '@mui/material';
 import {
     Dashboard as DashboardIcon,
@@ -89,31 +88,15 @@ export default function TripTabs({
         [journalEntries]
     );
 
-    const avgPerDay =
-        durationDays && stats.totalExpenses > 0
-            ? stats.totalExpenses / durationDays
-            : 0;
-
-    const latestEntries = journalEntries
-        .slice()
-        .sort(
-            (a, b) =>
-                new Date(b.entry_date).getTime() - new Date(a.entry_date).getTime()
-        )
-        .slice(0, 3);
-
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
     };
 
+    // Simplified tabs: Overview, Itinéraire (Journal+Map merged), Médias, Dépenses
     const tabs = [
         { icon: <DashboardIcon />, label: 'Aperçu', count: null },
         { icon: <ExploreIcon />, label: 'Itinéraire', count: stats.journalCount },
-        {
-            icon: <PhotoIcon />,
-            label: 'Médias',
-            count: stats.photosCount + stats.videosCount,
-        },
+        { icon: <PhotoIcon />, label: 'Médias', count: stats.photosCount + stats.videosCount },
         { icon: <ReceiptIcon />, label: 'Dépenses', count: expenses.length },
     ];
 
@@ -122,11 +105,11 @@ export default function TripTabs({
             {/* Tabs Navigation */}
             <Box
                 sx={{
-                    borderBottom: 1,
+                    borderBottom: 2,
                     borderColor: 'divider',
                     bgcolor: 'background.paper',
                     position: 'sticky',
-                    top: { xs: 88, sm: 72 },
+                    top: { xs: 100, sm: 80 },
                     zIndex: 5,
                 }}
             >
@@ -136,17 +119,13 @@ export default function TripTabs({
                     variant="scrollable"
                     scrollButtons={false}
                     sx={{
-                        minHeight: { xs: 48, sm: 52 },
-                        '& .MuiTabs-indicator': {
-                            height: 2,
-                            borderRadius: 999,
-                        },
+                        minHeight: { xs: 52, sm: 56 },
                         '& .MuiTab-root': {
-                            minHeight: { xs: 48, sm: 52 },
+                            minHeight: { xs: 52, sm: 56 },
                             minWidth: { xs: 'auto', sm: 140 },
-                            px: { xs: 1.5, sm: 3 },
+                            px: { xs: 2, sm: 3 },
                             fontSize: { xs: '0.8rem', sm: '0.9rem' },
-                            fontWeight: 600,
+                            fontWeight: 700,
                         },
                     }}
                 >
@@ -154,27 +133,21 @@ export default function TripTabs({
                         <Tab
                             key={index}
                             icon={
-                                <Box
-                                    sx={{
-                                        position: 'relative',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                    }}
-                                >
+                                <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                     {tab.icon}
                                     {tab.count !== null && tab.count > 0 && isMobile && (
                                         <Box
                                             sx={{
                                                 position: 'absolute',
-                                                top: -4,
-                                                right: -8,
+                                                top: -6,
+                                                right: -10,
                                                 bgcolor: 'primary.main',
                                                 color: 'primary.contrastText',
                                                 fontSize: 10,
                                                 fontWeight: tokens.fontWeights.bold,
-                                                borderRadius: '50%',
-                                                width: 16,
-                                                height: 16,
+                                                borderRadius: tokens.radius.circle,
+                                                width: 18,
+                                                height: 18,
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -189,9 +162,7 @@ export default function TripTabs({
                             label={
                                 isMobile
                                     ? undefined
-                                    : `${tab.label}${
-                                          tab.count !== null ? ` (${tab.count})` : ''
-                                      }`
+                                    : `${tab.label}${tab.count !== null ? ` (${tab.count})` : ''}`
                             }
                         />
                     ))}
@@ -200,184 +171,147 @@ export default function TripTabs({
 
             {/* Tab Content */}
             <Box sx={{ px: { xs: 2, sm: 3 } }}>
-                {/* OVERVIEW */}
+                {/* Overview Tab */}
                 <TabPanel value={currentTab} index={0}>
-                    <Stack spacing={3}>
-                        {/* Stat row */}
-                        <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-                            <Grid size={{ xs: 6, sm: 3 }}>
-                                <OverviewStatCard
-                                    value={durationDays}
-                                    label="jours de voyage"
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 6, sm: 3 }}>
-                                <OverviewStatCard
-                                    value={stats.journalCount}
-                                    label="étapes"
-                                    color="primary"
-                                    onClick={() => setCurrentTab(1)}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 6, sm: 3 }}>
-                                <OverviewStatCard
-                                    value={stats.photosCount + stats.videosCount}
-                                    label="médias"
-                                    color="secondary"
-                                    onClick={() => setCurrentTab(2)}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 6, sm: 3 }}>
-                                <OverviewStatCard
-                                    value={formatCurrency(stats.totalExpenses)}
-                                    label={
-                                        avgPerDay
-                                            ? `dépensés (≈ ${formatCurrency(
-                                                  avgPerDay
-                                              )}/jour)`
-                                            : 'dépensés'
-                                    }
-                                    color="error"
-                                    onClick={() => setCurrentTab(3)}
-                                />
-                            </Grid>
+                    {/* Quick Stats Grid */}
+                    <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: 3 }}>
+                        <Grid size={{ xs: 6, sm: 3 }}>
+                            <OverviewStatCard
+                                value={durationDays}
+                                label="jours"
+                                color="default"
+                            />
                         </Grid>
+                        <Grid size={{ xs: 6, sm: 3 }}>
+                            <OverviewStatCard
+                                value={stats.journalCount}
+                                label="étapes"
+                                color="primary"
+                                onClick={() => setCurrentTab(1)}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 3 }}>
+                            <OverviewStatCard
+                                value={stats.photosCount + stats.videosCount}
+                                label="médias"
+                                color="secondary"
+                                onClick={() => setCurrentTab(2)}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 3 }}>
+                            <OverviewStatCard
+                                value={formatCurrency(stats.totalExpenses)}
+                                label="dépensés"
+                                color="error"
+                                onClick={() => setCurrentTab(3)}
+                            />
+                        </Grid>
+                    </Grid>
 
-                        {/* Résumé du voyage */}
-                        <Card variant="outlined">
-                            <CardContent sx={{ py: { xs: 2, sm: 2.5 } }}>
-                                <Stack
-                                    direction={{ xs: 'column', sm: 'row' }}
-                                    spacing={2}
-                                    justifyContent="space-between"
-                                    alignItems="flex-start"
-                                >
-                                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                                        {moodData && (
-                                            <Chip
-                                                label={`${moodData.emoji} ${moodData.label}`}
-                                                size="small"
-                                                sx={{
-                                                    mb: 1.5,
-                                                    bgcolor: 'primary.main',
-                                                    color: 'primary.contrastText',
-                                                    fontWeight:
-                                                        tokens.fontWeights.medium,
-                                                }}
-                                            />
-                                        )}
-                                        <Typography
-                                            variant="subtitle2"
-                                            color="text.secondary"
-                                            sx={{ fontWeight: 600 }}
-                                        >
-                                            À propos de ce voyage
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{ mt: 0.5 }}
-                                        >
-                                            {trip.description ||
-                                                "Ajoutez une description pour garder le contexte de ce voyage."}
-                                        </Typography>
-                                    </Box>
-
-                                    {entriesWithGps > 0 && (
-                                        <Box
-                                            sx={{
-                                                px: 2,
-                                                py: 1.5,
-                                                borderRadius: 2,
-                                                bgcolor: 'background.default',
-                                                border: 1,
-                                                borderColor: 'divider',
-                                                cursor: 'pointer',
-                                                minWidth: { xs: '100%', sm: 220 },
-                                            }}
-                                            onClick={() => setCurrentTab(1)}
-                                        >
-                                            <Stack
-                                                direction="row"
-                                                alignItems="center"
-                                                spacing={1}
-                                            >
-                                                <ExploreIcon
-                                                    fontSize="small"
-                                                    color="action"
-                                                />
-                                                <Box>
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{ fontWeight: 600 }}
-                                                    >
-                                                        Itinéraire sur la carte
-                                                    </Typography>
-                                                    <Typography
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                    >
-                                                        {entriesWithGps} étape
-                                                        {entriesWithGps > 1 ? 's' : ''} géolocalisée
-                                                    </Typography>
-                                                </Box>
-                                            </Stack>
-                                        </Box>
-                                    )}
-                                </Stack>
-                            </CardContent>
-                        </Card>
-
-                        {/* Activité récente */}
-                        {latestEntries.length > 0 && (
-                            <Card variant="outlined">
-                                <CardContent sx={{ py: { xs: 2, sm: 2.5 } }}>
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            mb: 1.5,
-                                        }}
-                                    >
-                                        <Typography
-                                            variant="subtitle2"
-                                            sx={{ fontWeight: 600 }}
-                                        >
-                                            Dernières étapes
-                                        </Typography>
+                    {/* Trip Info Card */}
+                    <Card sx={{ mb: 3 }}>
+                        <CardContent>
+                            <Stack spacing={2}>
+                                {/* Mood */}
+                                {moodData && (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Chip
-                                            label="Voir l’itinéraire"
-                                            size="small"
-                                            onClick={() => setCurrentTab(1)}
+                                            label={`${moodData.emoji} ${moodData.label}`}
                                             sx={{
-                                                cursor: 'pointer',
-                                                bgcolor: 'background.default',
-                                                borderRadius: 999,
+                                                bgcolor: 'primary.main',
+                                                color: 'primary.contrastText',
+                                                fontWeight: tokens.fontWeights.bold,
                                             }}
                                         />
                                     </Box>
+                                )}
 
-                                    <Stack divider={<Divider flexItem />}>
-                                        {latestEntries.map((entry) => (
+                                {/* Description */}
+                                {trip.description && (
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: tokens.fontWeights.bold }}>
+                                            À propos
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                            {trip.description}
+                                        </Typography>
+                                    </Box>
+                                )}
+
+                                {/* GPS info */}
+                                {entriesWithGps > 0 && (
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            cursor: 'pointer',
+                                            p: 1.5,
+                                            borderRadius: tokens.radius.md,
+                                            bgcolor: 'action.hover',
+                                            border: 2,
+                                            borderStyle: 'dashed',
+                                            borderColor: 'divider',
+                                            '&:hover': {
+                                                bgcolor: 'action.selected',
+                                            },
+                                        }}
+                                        onClick={() => setCurrentTab(1)}
+                                    >
+                                        <ExploreIcon sx={{ color: 'primary.main' }} />
+                                        <Typography variant="body2" sx={{ fontWeight: tokens.fontWeights.semibold }}>
+                                            {entriesWithGps} étape{entriesWithGps > 1 ? 's' : ''} sur la carte
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
+                                            Voir →
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Stack>
+                        </CardContent>
+                    </Card>
+
+                    {/* Recent Activity Preview */}
+                    {journalEntries.length > 0 && (
+                        <Box>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 1.5,
+                                }}
+                            >
+                                <Typography variant="subtitle2" sx={{ fontWeight: tokens.fontWeights.bold }}>
+                                    Dernières étapes
+                                </Typography>
+                                <Chip
+                                    label="Voir tout"
+                                    size="small"
+                                    onClick={() => setCurrentTab(1)}
+                                    sx={{
+                                        cursor: 'pointer',
+                                        bgcolor: 'primary.main',
+                                        color: 'primary.contrastText',
+                                        fontWeight: tokens.fontWeights.bold,
+                                    }}
+                                />
+                            </Box>
+                            <Stack spacing={1}>
+                                {journalEntries.slice(0, 3).map((entry) => (
+                                    <Card key={entry.id} variant="outlined" sx={{ borderWidth: 2 }}>
+                                        <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
                                             <Box
-                                                key={entry.id}
                                                 sx={{
-                                                    py: 1.25,
                                                     display: 'flex',
-                                                    gap: 1.5,
+                                                    justifyContent: 'space-between',
                                                     alignItems: 'flex-start',
                                                 }}
                                             >
                                                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{ fontWeight: 600 }}
-                                                    >
+                                                    <Typography variant="body2" sx={{ fontWeight: tokens.fontWeights.bold }}>
                                                         {entry.location ||
-                                                            new Date(
-                                                                entry.entry_date
-                                                            ).toLocaleDateString('fr-FR', {
+                                                            new Date(entry.entry_date).toLocaleDateString('fr-FR', {
                                                                 day: 'numeric',
                                                                 month: 'short',
                                                             })}
@@ -387,7 +321,7 @@ export default function TripTabs({
                                                         color="text.secondary"
                                                         sx={{
                                                             display: '-webkit-box',
-                                                            WebkitLineClamp: 2,
+                                                            WebkitLineClamp: 1,
                                                             WebkitBoxOrient: 'vertical',
                                                             overflow: 'hidden',
                                                         }}
@@ -395,32 +329,28 @@ export default function TripTabs({
                                                         {entry.content}
                                                     </Typography>
                                                 </Box>
-
-                                                {entry.media_assets &&
-                                                    entry.media_assets.length > 0 && (
-                                                        <Chip
-                                                            label={`${entry.media_assets.length} média${
-                                                                entry.media_assets.length > 1
-                                                                    ? 's'
-                                                                    : ''
-                                                            }`}
-                                                            size="small"
-                                                            sx={{
-                                                                alignSelf: 'center',
-                                                                borderRadius: 999,
-                                                            }}
-                                                        />
-                                                    )}
+                                                {entry.media_assets && entry.media_assets.length > 0 && (
+                                                    <Chip
+                                                        icon={<PhotoIcon sx={{ fontSize: 14 }} />}
+                                                        label={entry.media_assets.length}
+                                                        size="small"
+                                                        sx={{
+                                                            ml: 1,
+                                                            height: 24,
+                                                            bgcolor: 'action.hover',
+                                                        }}
+                                                    />
+                                                )}
                                             </Box>
-                                        ))}
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </Stack>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Stack>
+                        </Box>
+                    )}
                 </TabPanel>
 
-                {/* Itinéraire */}
+                {/* Itinéraire Tab (Journal + Map merged) */}
                 <TabPanel value={currentTab} index={1}>
                     <JournalMapView
                         entries={journalEntries}
@@ -430,18 +360,14 @@ export default function TripTabs({
                     />
                 </TabPanel>
 
-                {/* Médias */}
+                {/* Médias Tab */}
                 <TabPanel value={currentTab} index={2}>
                     <MediaGallery media={media} tripId={trip.id} />
                 </TabPanel>
 
-                {/* Dépenses */}
+                {/* Dépenses Tab */}
                 <TabPanel value={currentTab} index={3}>
-                    <ExpenseList
-                        expenses={expenses}
-                        tripId={trip.id}
-                        onRefresh={onRefresh}
-                    />
+                    <ExpenseList expenses={expenses} tripId={trip.id} onRefresh={onRefresh} />
                 </TabPanel>
             </Box>
         </Box>

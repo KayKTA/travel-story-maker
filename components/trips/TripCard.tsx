@@ -3,7 +3,6 @@
 import { alpha } from '@mui/material/styles';
 import {
     Card,
-    CardContent,
     CardActionArea,
     Box,
     Typography,
@@ -13,170 +12,261 @@ import {
 import {
     CalendarMonth as CalendarIcon,
     Photo as PhotoIcon,
-    Videocam as VideoIcon,
     Euro as EuroIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { formatDateRange, formatCurrency } from '@/lib/utils/formatters';
+import { formatCurrency } from '@/lib/utils/formatters';
 import { TRIP_MOODS } from '@/types/trip';
-import { tokens, textTruncate } from '@/styles';
-import { StatItem } from '@/components/common';
+import { tokens, textTruncate, theme } from '@/styles';
 import type { TripWithStats } from '@/types';
 
 interface TripCardProps {
     trip: TripWithStats;
 }
 
-const COVER_HEIGHT = 132;
+const CARD_HEIGHT = 460;
 
 export default function TripCard({ trip }: TripCardProps) {
     const moodData = TRIP_MOODS.find((m) => m.value === trip.mood);
 
+    const startDate = trip.start_date ? new Date(trip.start_date) : null;
+    const monthLabel = startDate
+        ? startDate
+            .toLocaleString('fr-FR', { month: 'short' })
+            .toUpperCase()
+        : '';
+    const dayLabel = startDate ? startDate.getDate() : '';
+
     return (
         <Card
-            variant="outlined"
             sx={(theme) => ({
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                borderRadius: theme.shape.borderRadius,
-                boxShadow: 'none',
-                transition: theme.transitions.create(['box-shadow', 'transform'], {
+                // borderRadius: 4,
+                boxShadow: theme.shadows[3],
+                overflow: 'hidden',
+                backgroundColor: 'transparent',
+                transition: theme.transitions.create(['transform', 'box-shadow'], {
                     duration: theme.transitions.duration.shorter,
                 }),
                 '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: theme.shadows[3],
+                    transform: 'translateY(-4px)',
+                    boxShadow: theme.shadows[6],
                 },
             })}
         >
             <CardActionArea
                 component={Link}
                 href={`/trips/${trip.id}`}
-                sx={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'stretch',
-                }}
+                sx={{ display: 'block' }}
             >
-                {/* Cover */}
                 <Box
                     sx={(theme) => ({
-                        height: COVER_HEIGHT,
-                        background: trip.cover_image_url
-                            ? `url(${trip.cover_image_url}) center/cover`
-                            : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 40%, ${theme.palette.background.default} 100%)`,
                         position: 'relative',
-                        borderBottom: `1px solid ${theme.palette.divider}`,
+                        height: CARD_HEIGHT,
+                        display: 'flex',
+                        alignItems: 'stretch',
+                        justifyContent: 'flex-end',
+                        backgroundImage: trip.cover_image_url
+                            ? `url(${trip.cover_image_url})`
+                            : `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'bottom',
                     })}
                 >
-                    {/* Overlay title */}
+                    {/* Gradient overlay */}
                     <Box
                         sx={(theme) => ({
                             position: 'absolute',
-                            inset: 'auto 0 0 0',
-                            p: 2,
+                            inset: 0,
                             background: `linear-gradient(to top, ${alpha(
                                 theme.palette.common.black,
-                                0.35
-                            )}, transparent)`,
+                                0.9
+                            )}, ${alpha(theme.palette.common.black, 0.0)})`,
                         })}
+                    />
+
+                    {/* Content */}
+                    <Box
+                        sx={{
+                            position: 'relative',
+                            zIndex: 1,
+                            p: 2.5,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'flex-end',
+                            width: '100%',
+                        }}
                     >
-                        <Typography
-                            variant="subtitle1"
-                            sx={{
-                                color: 'common.white',
-                                fontWeight: tokens.fontWeights.bold,
-                            }}
+                        {/* Country name + City */}
+                        <Box sx={{ mb: 2 }}>
+                            <Typography
+                                variant="h3"
+                                sx={{
+                                    color: 'common.white',
+                                    fontWeight: tokens.fontWeights.bold,
+                                    lineHeight: 1.15,
+                                }}
+                            >
+                                {trip.country}
+                            </Typography>
+                            {/* {trip.city && (
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'common.white',
+                                        opacity: 0.9,
+                                        mt: 0.25,
+                                    }}
+                                >
+                                    {trip.city}
+                                </Typography>
+                            )} */}
+                        </Box>
+
+                        {/* Bottom info box */}
+                        <Box
+                            sx={(theme) => ({
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 2,
+                                borderRadius: 2,
+                                padding: 1.25,
+                                backgroundColor: alpha(
+                                    theme.palette.background.default,
+                                    0.7
+                                ),
+                                backdropFilter: 'blur(6px)',
+                            })}
                         >
-                            {trip.country}
-                        </Typography>
-                        {trip.city && (
+                            {/* Block type “DEC / 12” */}
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: 54,
+                                }}
+                            >
+                                {/* Month - colored bg */}
+                                <Box
+                                    sx={(theme) => ({
+                                        width: '100%',
+                                        borderRadius: '8px 8px 0 0',
+                                        bgcolor: alpha(theme.palette.primary.main, 0.9),
+                                        color: theme.palette.primary.contrastText,
+                                        textAlign: 'center',
+                                    })}
+                                >
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            fontWeight: 700,
+                                            letterSpacing: 0.8,
+                                            color: 'inherit',
+                                        }}
+                                    >
+                                        {monthLabel}
+                                    </Typography>
+                                </Box>
+
+                                {/* Day - white bg */}
+                                <Box
+                                    sx={(theme) => ({
+                                        width: '100%',
+                                        borderRadius: '0 0 8px 8px',
+                                        bgcolor: theme.palette.background.paper,
+                                        textAlign: 'center',
+                                        py: 0.8,
+                                    })}
+                                >
+                                    <Typography
+                                        variant="subtitle1"
+                                        sx={(theme) => ({
+                                            fontWeight: 700,
+                                            lineHeight: 1.1,
+                                            color: theme.palette.text.primary,
+                                        })}
+                                    >
+                                        {dayLabel}
+                                    </Typography>
+                                </Box>
+                            </Box>
+
+
+                            {/* Trip infos */}
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Stack
+                                    direction="row"
+                                    alignItems="center"
+                                    spacing={1}
+                                    sx={{ mb: 0.5 }}
+                                >
+                                    <CalendarIcon
+                                        fontSize="small"
+                                        sx={{ color: 'text.secondary' }}
+                                    />
+                                    <Typography
+                                        variant="body2"
+                                        color="text.primary"
+                                        sx={{ fontWeight: 500 }}
+                                    >
+                                        {trip.duration_days} jours
+                                        {/* •{' '} */}
+                                        {/* {trip.start_date && trip.end_date
+                                            ? `${trip.start_date} – ${trip.end_date}`
+                                            : 'Dates à définir'} */}
+                                    </Typography>
+                                </Stack>
+
+                                <Stack
+                                    direction="row"
+                                    spacing={2}
+                                    sx={{ color: 'text.secondary' }}
+                                >
+                                    {trip.photos_count > 0 && (
+                                        <Stack
+                                            direction="row"
+                                            spacing={0.5}
+                                            alignItems="center"
+                                        >
+                                            <PhotoIcon fontSize="small" />
+                                            <Typography variant="caption">
+                                                {trip.photos_count} média
+                                                {trip.photos_count > 1 ? 's' : ''}
+                                            </Typography>
+                                        </Stack>
+                                    )}
+
+                                    {trip.total_expenses > 0 && (
+                                        <Stack
+                                            direction="row"
+                                            spacing={0.5}
+                                            alignItems="center"
+                                        >
+                                            <EuroIcon fontSize="small" />
+                                            <Typography variant="caption">
+                                                {formatCurrency(trip.total_expenses)}
+                                            </Typography>
+                                        </Stack>
+                                    )}
+                                </Stack>
+                            </Box>
+                        </Box>
+
+                        {trip.description && (
                             <Typography
                                 variant="body2"
-                                sx={{ color: 'common.white', opacity: 0.9 }}
+                                sx={{
+                                    mt: 1,
+                                    color: 'common.white',
+                                    opacity: 0.9,
+                                    ...textTruncate(2),
+                                }}
                             >
-                                {trip.city}
+                                {trip.description}
                             </Typography>
                         )}
                     </Box>
-
-                    {/* Mood badge */}
-                    {moodData && (
-                        <Chip
-                            label={`${moodData.emoji} ${moodData.label}`}
-                            size="small"
-                            sx={{
-                                position: 'absolute',
-                                top: 12,
-                                right: 12,
-                                bgcolor: 'background.paper',
-                                fontWeight: tokens.fontWeights.medium,
-                            }}
-                        />
-                    )}
                 </Box>
-
-                {/* Content */}
-                <CardContent sx={{ flex: 1 }}>
-                    {/* Dates */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            mb: 1.5,
-                        }}
-                    >
-                        <CalendarIcon fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
-                            {formatDateRange(trip.start_date, trip.end_date)}
-                        </Typography>
-                        <Chip
-                            label={`${trip.duration_days} j`}
-                            size="small"
-                            variant="outlined"
-                            sx={{ ml: 'auto' }}
-                        />
-                    </Box>
-
-                    {/* Stats */}
-                    <Stack direction="row" spacing={2} flexWrap="wrap">
-                        {trip.photos_count > 0 && (
-                            <StatItem
-                                icon={<PhotoIcon fontSize="small" />}
-                                value={trip.photos_count}
-                            />
-                        )}
-                        {trip.videos_count > 0 && (
-                            <StatItem
-                                icon={<VideoIcon fontSize="small" />}
-                                value={trip.videos_count}
-                            />
-                        )}
-                        {trip.total_expenses > 0 && (
-                            <StatItem
-                                icon={<EuroIcon fontSize="small" />}
-                                value={formatCurrency(trip.total_expenses)}
-                            />
-                        )}
-                    </Stack>
-
-                    {/* Description preview */}
-                    {trip.description && (
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                                mt: 1.5,
-                                ...textTruncate(2),
-                            }}
-                        >
-                            {trip.description}
-                        </Typography>
-                    )}
-                </CardContent>
             </CardActionArea>
         </Card>
     );

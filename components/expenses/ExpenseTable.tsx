@@ -85,7 +85,7 @@ export default function ExpenseTable({
                             >
                                 <TableCell>
                                     <Typography variant="body2">
-                                        {formatDateShort(expense.date)}
+                                        {formatDateShort(expense.expense_date)}
                                     </Typography>
                                 </TableCell>
                                 <TableCell>

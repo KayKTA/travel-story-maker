@@ -3,7 +3,7 @@
 import { Chip, ChipProps } from '@mui/material';
 import { tokens } from '@/styles';
 
-interface CountBadgeProps extends Omit<ChipProps, 'label'> {
+interface CountBadgeProps extends Omit<ChipProps, 'label' | 'variant'> {
     count: number;
     singular?: string;
     plural?: string;

@@ -20,7 +20,8 @@ export default function StatItem({
     sx,
 }: StatItemProps) {
     return (
-        <Box sx={{ ...flexStart, gap: 0.5, ...sx }}>
+        <Box sx={{ ...sx }}>
+        {/* <Box sx={{ ...flexStart, gap: 0.5, ...sx }}> */}
             <Box sx={{ color: 'action.active', display: 'flex' }}>
                 {icon}
             </Box>

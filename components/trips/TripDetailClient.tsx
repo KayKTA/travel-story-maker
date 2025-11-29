@@ -182,6 +182,8 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     bgcolor: 'background.default',
                                     color: 'primary.main',
                                     fontWeight: tokens.fontWeights.medium,
+                                    px: 1,
+                                    py: 1,
                                     '&:hover': { bgcolor: 'background.paper' },
                                 }}
                             />
@@ -194,6 +196,8 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     borderColor: 'background.default',
                                     color: 'background.default',
                                     fontWeight: tokens.fontWeights.medium,
+                                    px: 1,
+                                    py: 1,
                                     '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' },
                                 }}
                             />
@@ -242,18 +246,21 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                         color: 'background.default',
                                         fontWeight: tokens.fontWeights.medium,
                                         '& .MuiChip-icon': { color: 'inherit' },
+                                        px: 1,
                                     }}
                                 />
                                 {stats.photosCount > 0 && (
                                     <Chip
                                         icon={<PhotoIcon sx={{ fontSize: 16 }} />}
                                         label={`${stats.photosCount} photos`}
+                                        onClick={() => setActiveTab('media')}
                                         size="small"
                                         sx={{
                                             bgcolor: trip.cover_image_url ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)',
                                             backdropFilter: trip.cover_image_url ? 'blur(4px)' : undefined,
                                             color: 'background.default',
                                             '& .MuiChip-icon': { color: 'inherit' },
+                                            px: 1,
                                         }}
                                     />
                                 )}
@@ -261,12 +268,14 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     <Chip
                                         icon={<VideoIcon sx={{ fontSize: 16 }} />}
                                         label={`${stats.videosCount} vidéos`}
+                                        onClick={() => setActiveTab('media')}
                                         size="small"
                                         sx={{
                                             bgcolor: trip.cover_image_url ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)',
                                             backdropFilter: trip.cover_image_url ? 'blur(4px)' : undefined,
                                             color: 'background.default',
                                             '& .MuiChip-icon': { color: 'inherit' },
+                                            px: 1,
                                         }}
                                     />
                                 )}
@@ -274,12 +283,14 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     <Chip
                                         icon={<ExpenseIcon sx={{ fontSize: 16 }} />}
                                         label={`${stats.totalExpenses.toFixed(0)}€`}
+                                        onClick={() => setActiveTab('expenses')}
                                         size="small"
                                         sx={{
                                             bgcolor: trip.cover_image_url ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)',
                                             backdropFilter: trip.cover_image_url ? 'blur(4px)' : undefined,
                                             color: 'background.default',
                                             '& .MuiChip-icon': { color: 'inherit' },
+                                            px: 1,
                                         }}
                                     />
                                 )}
@@ -306,6 +317,7 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     color: 'background.default',
                                     fontSize: '0.75rem',
                                     '& .MuiChip-icon': { color: 'inherit' },
+                                    px: 1,
                                 }}
                             />
                             {stats.photosCount > 0 && (
@@ -313,10 +325,12 @@ export default function TripDetailClient({ tripId }: TripDetailClientProps) {
                                     icon={<PhotoIcon sx={{ fontSize: 14 }} />}
                                     label={stats.photosCount}
                                     size="small"
+                                    onClick={() => setActiveTab('media')}
                                     sx={{
                                         bgcolor: 'rgba(0,0,0,0.1)',
                                         color: 'background.default',
                                         '& .MuiChip-icon': { color: 'inherit' },
+                                        px: 1,
                                     }}
                                 />
                             )}

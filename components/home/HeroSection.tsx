@@ -4,6 +4,7 @@ import { ArrowForward, Flight } from "@mui/icons-material";
 import { Box, Typography, Button, Stack } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import Brand from "../common/Brand";
+import ScrollIndicator from "../common/ScrollIndicator";
 
 export default function Hero() {
     const theme = useTheme();
@@ -43,8 +44,8 @@ export default function Hero() {
                     position: "relative",
                     zIndex: 1,
                     maxWidth: 560,
-                    px: { xs: 3, sm: 6, md: 10 },
-                    pb: { xs: 10, md: 20 },
+                    px: { xs: 4, sm: 6, md: 10 },
+                    pb: { xs: 30, md: 10 },
                 }}
             >
                 <Brand />
@@ -87,7 +88,7 @@ export default function Hero() {
                         letterSpacing: 0.3,
                         background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(
                             theme.palette.primary.main,
-                            0.75
+                            1
                         )})`,
                         transition: "0.25s ease",
                         position: "relative",
@@ -119,8 +120,9 @@ export default function Hero() {
                 >
                     Commencer un voyage
                 </Button>
-
             </Box>
+            <ScrollIndicator />
+
         </Box>
     );
 }

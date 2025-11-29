@@ -1,36 +1,205 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌍 Travel Story Maker
 
-## Getting Started
+> A minimalist travel journaling & storytelling app built with **Next.js**, **Supabase**, **MUI**, and optional **AI-powered** features.
 
-First, run the development server:
+Travel Story Maker centralizes destinations, media, expenses, and daily notes — and transforms your journey into a structured, visual story.
+
+---
+
+![Hero Screenshot](./public/screenshots/hero.png)
+
+---
+
+## ✨ Features
+
+### 🗺️ Global Trip Overview
+Create trips by country, set dates, moods, and descriptions, and view instant statistics (days, photos, videos, expenses, journal entries).
+
+### 📍 Interactive Map & Journal
+Each entry appears as a marker on the map. Selecting a marker scrolls to the timeline entry, and vice‑versa.
+
+### 🖼️ Media Management (Photos & Videos)
+Upload photos and videos, extract metadata (EXIF, geolocation), and connect them to specific days or locations.
+
+### 📝 Intelligent Travel Journal
+Write or record your day — audio uploads are transcribed into text automatically.
+
+### 💸 Expense Tracking
+Import expenses from CSV, categorize them, view totals by category, by trip, and across currencies.
+
+### 🤖 AI‑Generated Stories
+Automatically generate summaries, reel scripts, captions, and travel reviews based on your real data.
+
+### 🎨 Clean, Modern Landing Page
+Fullscreen hero, animated CTA, custom illustrations, horizontal timeline, and Apple‑inspired minimalism.
+
+---
+
+# 📸 Screenshots
+
+### 🏔️ Home & Hero
+![Home](./public/screenshots/hero.png)
+
+### 🗺️ Trip Details & Map
+![Trip Map](./public/screenshots/trip-details.png)
+
+### 📝 Journal & Timeline
+![Journal](./public/screenshots/journal.png)
+
+### 📸 Media Gallery
+![Media](./public/screenshots/media.png)
+
+### 💸 Expenses Dashboard
+![Expenses](./public/screenshots/expenses.png)
+
+### 🎨 Features Section
+![Features](./public/screenshots/features.png)
+
+### 🔄 How It Works Timeline
+![Timeline](./public/screenshots/timeline.png)
+
+---
+
+## 🧱 Tech Stack
+
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **UI Library**: Material UI (MUI) with a fully custom theme
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Styling**: MUI theme tokens + global CSS
+- **Maps**: Leaflet (dynamic import)
+- **AI**: Optional OpenAI integration
+- **Tooling**: pnpm, ESLint, Prettier
+
+---
+
+## 🗄️ Database Structure (Simplified)
+
+- `trips` — main trip metadata
+- `journal_entries` — daily logs
+- `media_assets` — photos/videos + metadata
+- `expenses` — categorized spending
+- `stories` — AI‑generated content
+- `reels` — future automated video generation
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the project
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your_repo_url>
+cd travel-story-maker
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Create environment variables
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
 
-To learn more about Next.js, take a look at the following resources:
+# Optional AI key
+OPENAI_API_KEY=<your_openai_key>
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Start the dev server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+Then open:
+➡ `http://localhost:3000`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 Scripts
+
+The project includes Node scripts (`.mjs`) for:
+
+- Importing Polarsteps JSON
+- Seeding journal entries
+- Matching GPS coordinates
+- Importing expenses from CSV
+- Linking media to journal entries
+
+Run a script with:
+
+```bash
+node scripts/<script-name>.mjs
+```
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+  app/
+    page.tsx
+    trips/
+      page.tsx
+      [id]/
+        page.tsx
+  components/
+    hero/
+    features/
+    how-it-works/
+    trips/
+    common/
+  lib/
+    supabase/
+    utils/
+    hooks/
+  styles/
+    theme.ts
+    tokens.ts
+    globals.css
+
+public/
+  screenshots/
+    hero.png
+    home.png
+    trip-details.png
+    journal.png
+    media.png
+    expenses.png
+    features.png
+    timeline.png
+
+scripts/
+```
+
+---
+
+## 🧭 Roadmap
+
+- Automated reel creation
+- Public sharing pages
+- Global travel dashboards
+- Offline/PWA mode
+- AI itinerary review & travel advice
+
+---
+
+## 🤝 Contributing
+
+This project is a portfolio showcase & personal travel tool.
+Contributions, improvements, or feature ideas are welcome.
+
+---
+
+## 📄 License
+
+**All Rights Reserved.**
+
+This project and its source code may not be copied, modified, published, distributed, or reused without explicit permission from the author.
+
+© 2025 Kaniba Keita — All Rights Reserved.

@@ -41,7 +41,7 @@ export default function HowItWorks() {
             }}
         >
             <Box
-                component="section"
+                // component="section"
                 sx={{
                     py: { xs: 10, md: 14 },
                     px: 3,

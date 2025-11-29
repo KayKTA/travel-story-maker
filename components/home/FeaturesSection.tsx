@@ -58,7 +58,7 @@ export default function Features() {
             }}
         >
             <Box
-                component="section"
+                // component="section"
                 sx={{
                     py: { xs: 10, md: 14 },
                     maxWidth: "1100px",

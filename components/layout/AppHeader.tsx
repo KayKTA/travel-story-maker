@@ -27,7 +27,7 @@ export default function AppHeader() {
                     variant="h6"
                     sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: '-0.03em' }}
                 >
-                    Travel Story Maker
+                    Travel Story
                 </Typography>
 
                 <Button

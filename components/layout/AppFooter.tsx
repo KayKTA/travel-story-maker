@@ -24,7 +24,7 @@ export default function AppFooter() {
                 }}
             >
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Travel Story Maker
+                    Travel Story
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                     Fait avec ❤️ pour documenter les grands voyages.

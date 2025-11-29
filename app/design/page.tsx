@@ -164,7 +164,7 @@ export default function DesignSystemPage() {
                         Design System
                     </Typography>
                     <Typography variant="h6" sx={{ mt: 1, opacity: 0.8 }}>
-                        Travel Story Maker - Composants et Styles
+                        Travel Story - Composants et Styles
                     </Typography>
                 </Container>
             </Box>

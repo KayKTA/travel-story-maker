@@ -1,81 +1,112 @@
 'use client';
 
-import { Box, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
+import Image from 'next/image';
 import { alpha } from '@mui/material/styles';
-import { ReactNode } from 'react';
 
 interface FeatureCardProps {
-    icon: ReactNode;
+    imageSrc: string;
     title: string;
     description: string;
+    blobVariant?: number; // pour varier la forme du blob
 }
 
-export default function FeatureCard({ icon, title, description }: FeatureCardProps) {
+export default function FeatureCard({
+    imageSrc,
+    title,
+    description,
+    blobVariant = 0,
+}: FeatureCardProps) {
     const theme = useTheme();
+
+    const blobShapes = [
+        '60% 40% 50% 70% / 55% 60% 40% 45%',
+        '45% 55% 65% 35% / 40% 60% 50% 60%',
+        '55% 45% 60% 40% / 60% 40% 60% 40%',
+    ];
+    const shape = blobShapes[blobVariant % blobShapes.length];
 
     return (
         <Box
             sx={{
                 display: 'flex',
-                alignItems: 'flex-start',
-                gap: 2,
-                p: 2,
-                minHeight: 96,
-                borderRadius: theme.shape.borderRadius, // léger arrondi
-                // border: `1px solid ${theme.palette.divider}`,
-                bgcolor: theme.palette.background.default,
-                boxShadow: theme.shadows[2],
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                px: 2,
+                py: 3,
+                borderRadius: 3,
+                // bgcolor: 'background.paper',
+                // boxShadow: 1,
+                // transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                // '&:hover': {
+                //     transform: 'translateY(-4px)',
+                //     boxShadow: 3,
+                // },
+                '&:hover .feature-blob-wrapper': {
+                    transform: 'translateY(-2px) scale(1.04)',
+                },
+                '&:hover .feature-blob-wrapper::before': {
+                    opacity: 0.75,
+                    // transform: 'scale(1.08) rotate(2deg)',
+                },
             }}
         >
-
-            <Stack
-                spacing={1.5}
-                alignItems="center"
+            {/* BLOB + IMAGE */}
+            <Box
+                className="feature-blob-wrapper"
                 sx={{
-                    textAlign: 'center',
-                    px: { xs: 1, md: 2 },
+                    position: 'relative',
+                    width: 112,
+                    height: 112,
+                    mb: 2,
+                    transition: 'transform 0.35s ease',
+                    '&::before': (theme) => ({
+                        content: '""',
+                        position: 'absolute',
+                        inset: 0,
+                        borderRadius: shape,
+                        background: theme.palette.primary.light,
+                        opacity: 0.45,
+                        filter: 'blur(1px)',
+                        transform: 'scale(1.02)',
+                        transition: 'transform 0.35s ease',
+                    }),
                 }}
             >
-                {/* “Logo” / illustration */}
+                {/* Zone pour l'illustration avec padding interne */}
                 <Box
                     sx={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: '50%',
+                        position: 'absolute',
+                        inset: 20, // padding between blob edge and image
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: alpha(theme.palette.primary.main, 0.08),
-                        color: theme.palette.primary.main,
-                        mb: 0.5,
+                        zIndex: 1,
                     }}
                 >
-                    {icon}
+                    <Image
+                        src={`/images/features/${imageSrc}`}
+                        alt={title}
+                        fill
+                        style={{
+                            objectFit: 'contain',
+                        }}
+                    />
                 </Box>
+            </Box>
 
-                {/* Titre */}
-                <Typography
-                    variant="subtitle1"
-                    sx={{
-                        fontWeight: 600,
-                        letterSpacing: '-0.01em',
-                    }}
-                >
-                    {title}
-                </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                {title}
+            </Typography>
 
-                {/* Sous-texte */}
-                <Typography
-                    variant="body2"
-                    sx={{
-                        color: 'text.secondary',
-                        maxWidth: 260,
-                        fontSize: '0.85rem',
-                    }}
-                >
-                    {description}
-                </Typography>
-            </Stack>
+            <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ maxWidth: 260 }}
+            >
+                {description}
+            </Typography>
         </Box>
     );
 }

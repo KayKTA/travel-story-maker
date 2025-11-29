@@ -13,13 +13,13 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
     title: {
-        default: 'Travel Story Maker',
-        template: '%s | Travel Story Maker',
+        default: 'Travel Story',
+        template: '%s | Travel Story',
     },
     description: 'Enregistrez vos voyages, tenez un journal, suivez vos dépenses et créez des stories de voyage avec l\'IA.',
     keywords: ['voyage', 'journal', 'travel', 'story', 'photos', 'dépenses', 'carte'],
-    authors: [{ name: 'Travel Story Maker' }],
-    creator: 'Travel Story Maker',
+    authors: [{ name: 'Travel Story' }],
+    creator: 'Travel Story',
     robots: 'noindex, nofollow', // Private app
     icons: {
         icon: '/favicon.ico',

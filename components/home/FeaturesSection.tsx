@@ -1,69 +1,104 @@
 "use client";
 
 import { Box, Typography, Grid } from "@mui/material";
-import AirplaneTicketIcon from "@mui/icons-material/AirplaneTicket";
-import MapIcon from "@mui/icons-material/Map";
-import AutoStoriesIcon from "@mui/icons-material/AutoStories";
-import ImageIcon from "@mui/icons-material/Image";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
+import FeatureCard from "./FeatureCard";
 
 const features = [
+    // {
+    //     image: "feature1.png",
+    //     title: "Vue globale par pays",
+    //     description:
+    //         "Chaque pays possède sa page : dates, humeur, dépenses, médias et résumé.",
+    // },
     {
-        icon: <AirplaneTicketIcon fontSize="large" />,
-        title: "Organise tes voyages",
-        desc: "Ajoute tes pays, dates et lieux facilement.",
+        image: "feature1.png",
+        title: "Itinéraire sur carte",
+        description:
+            "L’itinéraire se génère automatiquement à partir des étapes enregistrées.",
     },
     {
-        icon: <MapIcon fontSize="large" />,
-        title: "Carte interactive",
-        desc: "Visualise ton parcours automatiquement.",
+        image: "feature3.png",
+        title: "Photos & vidéos reliées",
+        description:
+            "Tes médias sont attachés aux étapes correspondantes pour revivre ton voyage.",
     },
     {
-        icon: <ImageIcon fontSize="large" />,
-        title: "Photos & vidéos",
-        desc: "Importe tes médias, extraits automatiquement triés.",
+        image: "feature6.png",
+        title: "Journal de bord intelligent",
+        description:
+            "Écris ou dicte ta journée, l’app structure automatiquement ton récit.",
     },
     {
-        icon: <AutoStoriesIcon fontSize="large" />,
-        title: "Journal immersif",
-        desc: "Écris ou dicte chaque journée, mood inclus.",
+        image: "feature5.png",
+        title: "Analyse des dépenses",
+        description:
+            "Catégories, graphiques, monnaies locales : tout ton budget clair et visuel.",
     },
-    {
-        icon: <SmartToyIcon fontSize="large" />,
-        title: "IA intégrée",
-        desc: "Résumé, scripts, carrousels, reels… en un clic.",
-    },
+    // {
+    //     image: "feature4.png",
+    //     title: "IA pour raconter ton voyage",
+    //     description:
+    //         "Génère résumés, scripts, captions et revues basées sur tes vraies données.",
+    // },
 ];
 
 export default function Features() {
     return (
         <Box
             sx={{
-                py: 10,
                 px: 3,
-                maxWidth:
-                "1200px",
-                mx: "auto"
-            }}>
-            <Typography variant="h3" sx={{ textAlign: "center", mb: 6 }}>
-                Tout ce qu’il faut pour ton voyage
-            </Typography>
+                background: `
+                    linear-gradient(
+                        180deg,
+                        #FFFFFF 0%,
+                        rgba(255,226,140,0.15) 35%,
+                        #FFFFFF 100%
+                    )
+                `,
+            }}
+        >
+            <Box
+                component="section"
+                sx={{
+                    py: { xs: 10, md: 14 },
+                    maxWidth: "1100px",
+                    mx: "auto",
+                }}
+            >
+                <Typography
+                    variant="h2"
+                    sx={{ textAlign: "center", mb: 2, fontWeight: 700 }}
+                >
+                    Tout ce qu’il faut pour ton voyage
+                </Typography>
 
-            <Grid container spacing={6}>
-                {features.map((f, i) => (
-                    <Grid key={i} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-                        <Box sx={{ textAlign: "center" }}>
-                            <Box sx={{ mb: 2 }}>{f.icon}</Box>
-                            <Typography variant="h6" sx={{ mb: 1 }}>
-                                {f.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {f.desc}
-                            </Typography>
-                        </Box>
-                    </Grid>
-                ))}
-            </Grid>
+                <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{
+                        textAlign: "center",
+                        mb: { xs: 6, md: 8 },
+                        maxWidth: 640,
+                        mx: "auto",
+                    }}
+                >
+                    Regroupe destinations, médias, émotions et budget dans une seule
+                    app minimaliste pensée pour les voyageurs.
+                </Typography>
+
+                <Grid container spacing={{ xs: 4, md: 5 }}>
+                    {features.map((f, i) => (
+                        <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
+                            <FeatureCard
+                                imageSrc={f.image}
+                                title={f.title}
+                                description={f.description}
+                                blobVariant={i}
+                            />
+                        </Grid>
+                    ))}
+                </Grid>
+            </Box>
         </Box>
     );
 }

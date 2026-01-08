@@ -21,11 +21,11 @@ export interface JournalEntry {
 
 export interface JournalEntryWithMedia extends JournalEntry {
     media_assets?: MediaAsset[];
-    trip?: {
-        id: string;
-        country: string;
-        city: string | null;
-    };
+    // trip?: {
+    //     id: string;
+    //     country: string;
+    //     city: string | null;
+    // };
 }
 
 export interface JournalEntryFormData {

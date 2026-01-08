@@ -4,6 +4,9 @@ import { SpeedDial, SpeedDialAction, SpeedDialIcon, SxProps, Theme } from '@mui/
 import { ReactNode } from 'react';
 import { useDisclosure, useBreakpoint } from '@/lib/hooks';
 
+/**
+ * Defines an action item for the ActionSpeedDial component.
+ */
 export interface SpeedDialActionItem {
     icon: ReactNode;
     name: string;

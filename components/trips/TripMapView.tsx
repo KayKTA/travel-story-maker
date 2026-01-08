@@ -9,7 +9,7 @@ import type { JournalEntryWithMedia, MediaAsset } from '@/types';
 
 interface TripMapViewProps {
     entries: JournalEntryWithMedia[];
-    media: MediaAsset[];
+    // media: MediaAsset[];
     tripLat?: number | null;
     tripLng?: number | null;
     selectedEntryId?: string | null;
@@ -19,7 +19,7 @@ interface TripMapViewProps {
 
 export default function TripMapView({
     entries,
-    media,
+    // media,
     tripLat,
     tripLng,
     selectedEntryId,

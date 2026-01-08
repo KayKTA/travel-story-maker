@@ -327,7 +327,7 @@ export default function TripOverviewDashboard({
                     <Box sx={{ height: 'calc(100% - 57px)' }}>
                         <TripMapView
                             entries={entriesWithCoords}
-                            media={media}
+                            // media={media}
                             tripLat={trip.lat}
                             tripLng={trip.lng}
                         />

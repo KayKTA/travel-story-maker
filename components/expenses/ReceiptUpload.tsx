@@ -10,22 +10,19 @@ import {
     Paper,
     CircularProgress,
 } from '@mui/material';
-import {
-    CameraAlt as CameraIcon,
-    Receipt as ReceiptIcon,
-} from '@mui/icons-material';
+import { CameraAlt as CameraIcon } from '@mui/icons-material';
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from '@/lib/utils/constants';
 import { validateReceiptFile } from '@/lib/utils/validators';
 import { formatFileSize } from '@/lib/utils/formatters';
 import { uploadFile, getPublicUrl, STORAGE_BUCKETS } from '@/lib/supabase/client';
-import type { ExpenseFormData, ReceiptExtractionResponse } from '@/types';
+import type { ExpenseFormData } from '@/types';
 
 interface ReceiptUploadProps {
     onExtracted: (data: Partial<ExpenseFormData>) => void;
     tripId?: string;
 }
 
-type UploadStatus = 'idle' | 'uploading' | 'extracting' | 'completed' | 'error';
+type UploadStatus = 'idle' | 'uploading' | 'completed' | 'error';
 
 export default function ReceiptUpload({ onExtracted, tripId }: ReceiptUploadProps) {
     const [status, setStatus] = useState<UploadStatus>('idle');
@@ -64,37 +61,15 @@ export default function ReceiptUpload({ onExtracted, tripId }: ReceiptUploadProp
                 throw uploadError;
             }
 
-            setProgress(50);
-            setStatus('extracting');
+            setProgress(100);
+            setStatus('completed');
 
             // Get public URL
             const imageUrl = getPublicUrl(STORAGE_BUCKETS.RECEIPTS, path);
 
-            // Call OCR API
-            const response = await fetch('/api/expenses/extract', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ imageUrl }),
-            });
-
-            const result: ReceiptExtractionResponse = await response.json();
-
-            setProgress(100);
-
-            if (!result.success || !result.data) {
-                throw new Error(result.error || 'Extraction failed');
-            }
-
-            setStatus('completed');
-
-            // Pass extracted data to parent
+            // Pass receipt URL to parent (no OCR extraction)
             onExtracted({
                 trip_id: tripId,
-                amount: result.data.amount,
-                currency: result.data.currency,
-                date: result.data.date,
-                label: result.data.label,
-                category: result.data.category,
                 receipt_image_url: imageUrl,
             });
         } catch (err) {
@@ -151,9 +126,6 @@ export default function ReceiptUpload({ onExtracted, tripId }: ReceiptUploadProp
                         Photographiez ou uploadez un ticket
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        L'IA extraira automatiquement les informations
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
                         Taille max: {formatFileSize(MAX_FILE_SIZE.RECEIPT)}
                     </Typography>
                 </Paper>
@@ -185,7 +157,7 @@ export default function ReceiptUpload({ onExtracted, tripId }: ReceiptUploadProp
                     )}
 
                     {/* Progress */}
-                    {(status === 'uploading' || status === 'extracting') && (
+                    {status === 'uploading' && (
                         <Box sx={{ textAlign: 'center' }}>
                             <LinearProgress
                                 variant="determinate"
@@ -195,7 +167,7 @@ export default function ReceiptUpload({ onExtracted, tripId }: ReceiptUploadProp
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                                 <CircularProgress size={20} />
                                 <Typography variant="body2" color="text.secondary">
-                                    {status === 'uploading' ? 'Upload en cours...' : 'Extraction des données...'}
+                                    Upload en cours...
                                 </Typography>
                             </Box>
                         </Box>
@@ -207,11 +179,11 @@ export default function ReceiptUpload({ onExtracted, tripId }: ReceiptUploadProp
                             severity="success"
                             action={
                                 <Button color="inherit" size="small" onClick={handleReset}>
-                                    Nouveau scan
+                                    Nouveau ticket
                                 </Button>
                             }
                         >
-                            Données extraites avec succès ! Vérifiez le formulaire ci-dessous.
+                            Ticket uploadé avec succès !
                         </Alert>
                     )}
 

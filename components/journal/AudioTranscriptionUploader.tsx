@@ -20,6 +20,7 @@ import {
 import { ACCEPTED_AUDIO_TYPES, MAX_FILE_SIZE } from '@/lib/utils/constants';
 import { validateAudioFile } from '@/lib/utils/validators';
 import { formatFileSize } from '@/lib/utils/formatters';
+import { useTranscription } from '@/lib/hooks';
 
 interface AudioTranscriptionUploaderProps {
     onTranscriptionComplete: (text: string) => void;
@@ -30,6 +31,7 @@ type UploadStatus = 'idle' | 'selected' | 'uploading' | 'transcribing' | 'comple
 export default function AudioTranscriptionUploader({
     onTranscriptionComplete,
 }: AudioTranscriptionUploaderProps) {
+    const transcribe = useTranscription();
     const [file, setFile] = useState<File | null>(null);
     const [status, setStatus] = useState<UploadStatus>('idle');
     const [progress, setProgress] = useState(0);
@@ -89,32 +91,17 @@ export default function AudioTranscriptionUploader({
         setProgress(20);
 
         try {
-            // Create FormData with the audio file
-            const formData = new FormData();
-            formData.append('audio', file);
-
             setProgress(40);
             setStatus('transcribing');
 
-            // Call the transcription API
-            const response = await fetch('/api/journal/transcribe', {
-                method: 'POST',
-                body: formData,
-            });
-
-            setProgress(80);
-
-            const result = await response.json();
-
-            if (!result.success) {
-                throw new Error(result.error || 'Échec de la transcription');
-            }
+            // Call the transcription API via hook
+            const text = await transcribe.mutateAsync(file);
 
             setProgress(100);
             setStatus('completed');
 
             // Pass the transcribed text to parent
-            onTranscriptionComplete(result.text);
+            onTranscriptionComplete(text);
         } catch (err) {
             setStatus('error');
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');

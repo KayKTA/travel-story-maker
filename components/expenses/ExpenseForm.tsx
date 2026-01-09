@@ -30,8 +30,7 @@ import {
     type ExpenseCategory,
 } from '@/types/expense';
 import { validateExpense } from '@/lib/utils/validators';
-import { getSupabaseClient } from '@/lib/supabase/client';
-import { useBreakpoint } from '@/lib/hooks';
+import { useBreakpoint, useCreateExpense } from '@/lib/hooks';
 import { tokens, flexBetween } from '@/styles';
 
 interface ExpenseFormProps {
@@ -67,12 +66,12 @@ export default function ExpenseForm({
     isEditing = false,
 }: ExpenseFormProps) {
     const { isMobile } = useBreakpoint();
+    const createExpense = useCreateExpense();
 
     const [formData, setFormData] = useState<ExpenseFormData>({
         ...EMPTY_FORM_DATA,
         trip_id: tripId,
     });
-    const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<string[]>([]);
 
     // Reset form when dialog opens
@@ -107,36 +106,20 @@ export default function ExpenseForm({
             return;
         }
 
-        setLoading(true);
         setErrors([]);
 
         try {
-            const supabase = getSupabaseClient();
-
-            const { error } = await supabase.from('expenses').insert({
-                trip_id: tripId,
-                expense_date: formData.date,
-                amount: formData.amount,
-                currency: formData.currency,
-                category: formData.category,
-                label: formData.label || null,
-                notes: formData.notes || null,
-            });
-
-            if (error) throw error;
-
+            await createExpense.mutateAsync(formData);
             await onSubmit();
             onClose();
         } catch (error) {
             console.error('Submit error:', error);
             setErrors(['Une erreur est survenue. Veuillez réessayer.']);
-        } finally {
-            setLoading(false);
         }
     };
 
     const handleClose = () => {
-        if (!loading) {
+        if (!createExpense.isPending) {
             onClose();
         }
     };
@@ -180,7 +163,7 @@ export default function ExpenseForm({
                 </Box>
                 <IconButton
                     onClick={handleClose}
-                    disabled={loading}
+                    disabled={createExpense.isPending}
                     sx={{ color: 'secondary.contrastText' }}
                 >
                     <CloseIcon />
@@ -296,12 +279,12 @@ export default function ExpenseForm({
                     fullWidth
                     size="large"
                     onClick={handleSubmit}
-                    disabled={loading || !formData.amount}
-                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                    disabled={createExpense.isPending || !formData.amount}
+                    startIcon={createExpense.isPending ? <CircularProgress size={20} color="inherit" /> : null}
                     color="secondary"
                     sx={{ py: 1.5, borderRadius: tokens.radius.md }}
                 >
-                    {loading ? 'Enregistrement...' : isEditing ? 'Enregistrer' : 'Ajouter la dépense'}
+                    {createExpense.isPending ? 'Enregistrement...' : isEditing ? 'Enregistrer' : 'Ajouter la dépense'}
                 </Button>
             </Box>
         </Dialog>

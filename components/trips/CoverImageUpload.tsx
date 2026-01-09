@@ -21,6 +21,7 @@ import {
     Close as CloseIcon,
 } from '@mui/icons-material';
 import { tokens, flexCenter } from '@/styles';
+import { useUploadCoverImage, useDeleteCoverImage } from '@/lib/hooks';
 
 interface CoverImageUploadProps {
     tripId: string;
@@ -37,8 +38,10 @@ export default function CoverImageUpload({
     onRemove,
     variant = 'button',
 }: CoverImageUploadProps) {
+    const uploadCoverImage = useUploadCoverImage();
+    const deleteCoverImage = useDeleteCoverImage();
+
     const [open, setOpen] = useState(false);
-    const [uploading, setUploading] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -74,56 +77,29 @@ export default function CoverImageUpload({
     const handleUpload = async () => {
         if (!selectedFile) return;
 
-        setUploading(true);
         setError(null);
 
         try {
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('tripId', tripId);
-
-            const response = await fetch('/api/trips/cover-image', {
-                method: 'POST',
-                body: formData,
+            const imageUrl = await uploadCoverImage.mutateAsync({
+                file: selectedFile,
+                tripId,
             });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Erreur lors de l\'upload');
-            }
-
-            const data = await response.json();
-            onUploadComplete?.(data.imageUrl);
+            onUploadComplete?.(imageUrl);
             handleClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload');
-        } finally {
-            setUploading(false);
         }
     };
 
     const handleRemove = async () => {
-        setUploading(true);
         setError(null);
 
         try {
-            const response = await fetch('/api/trips/cover-image', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tripId }),
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Erreur lors de la suppression');
-            }
-
+            await deleteCoverImage.mutateAsync(tripId);
             onRemove?.();
             handleClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erreur lors de la suppression');
-        } finally {
-            setUploading(false);
         }
     };
 
@@ -284,23 +260,23 @@ export default function CoverImageUpload({
                         <Button
                             onClick={handleRemove}
                             color="error"
-                            disabled={uploading}
+                            disabled={uploadCoverImage.isPending || deleteCoverImage.isPending}
                             startIcon={<DeleteIcon />}
                         >
                             Supprimer
                         </Button>
                     )}
                     <Box sx={{ flex: 1 }} />
-                    <Button onClick={handleClose} disabled={uploading}>
+                    <Button onClick={handleClose} disabled={uploadCoverImage.isPending || deleteCoverImage.isPending}>
                         Annuler
                     </Button>
                     <Button
                         onClick={handleUpload}
                         variant="contained"
-                        disabled={!selectedFile || uploading}
-                        startIcon={uploading ? <CircularProgress size={16} /> : <UploadIcon />}
+                        disabled={!selectedFile || uploadCoverImage.isPending || deleteCoverImage.isPending}
+                        startIcon={(uploadCoverImage.isPending || deleteCoverImage.isPending) ? <CircularProgress size={16} /> : <UploadIcon />}
                     >
-                        {uploading ? 'Upload...' : 'Enregistrer'}
+                        {(uploadCoverImage.isPending || deleteCoverImage.isPending) ? 'Upload...' : 'Enregistrer'}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -1,65 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Box, Container, Grid, Skeleton, Typography, Paper, Button } from '@mui/material';
 import { Flight as FlightIcon } from '@mui/icons-material';
 import PageHeader from '@/components/layout/PageHeader';
 import JournalEntryCard from '@/components/journal/JournalEntryCard';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { useJournalEntries } from '@/lib/hooks';
 import type { JournalEntryWithMedia } from '@/types';
 
 export default function JournalPageClient() {
     const router = useRouter();
-    const [entries, setEntries] = useState<JournalEntryWithMedia[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: entriesData = [], isLoading: loading } = useJournalEntries();
 
-    useEffect(() => {
-        loadEntries();
-    }, []);
-
-    const loadEntries = async () => {
-        setLoading(true);
-        const supabase = getSupabaseClient();
-
-        const { data: entriesData, error } = await supabase
-            .from('journal_entries')
-            .select(`
-        *,
-        trips:trip_id (
-          id,
-          country,
-          city
-        )
-      `)
-            .order('entry_date', { ascending: false });
-
-        if (error) {
-            console.error('Error fetching journal entries:', error);
-            setLoading(false);
-            return;
-        }
-
-        // Get media for each entry
-        const entriesWithMedia = await Promise.all(
-            (entriesData || []).map(async (entry) => {
-                const { data: media } = await supabase
-                    .from('media_assets')
-                    .select('*')
-                    .eq('journal_entry_id', entry.id)
-                    .order('taken_at', { ascending: true });
-
-                return {
-                    ...entry,
-                    trip: entry.trips,
-                    media_assets: media || [],
-                } as JournalEntryWithMedia;
-            })
-        );
-
-        setEntries(entriesWithMedia);
-        setLoading(false);
-    };
+    // Transform API data to match JournalEntryWithMedia type
+    const entries: JournalEntryWithMedia[] = entriesData.map((entry: any) => ({
+        ...entry,
+        trip: entry.trips,
+        media_assets: entry.media_assets || [],
+    }));
 
     return (
         <Box>

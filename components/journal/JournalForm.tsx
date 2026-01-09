@@ -36,9 +36,14 @@ import {
 } from '@mui/icons-material';
 import exifr from 'exifr';
 import { JOURNAL_MOODS, type JournalEntryFormData, type JournalMood } from '@/types/journal';
-import { getSupabaseClient } from '@/lib/supabase/client';
 import { formatFileSize } from '@/lib/utils/formatters';
 import { MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES, ACCEPTED_VIDEO_TYPES } from '@/lib/utils/constants';
+import {
+    useCreateJournalEntry,
+    useMediaUpload,
+    useTranscription,
+    useReverseGeocode,
+} from '@/lib/hooks';
 
 interface JournalFormProps {
     open: boolean;
@@ -64,16 +69,13 @@ interface MediaFile {
     error?: string;
 }
 
-// Reverse geocoding to get location name from coordinates
-const reverseGeocode = async (lat: number, lng: number): Promise<string | null> => {
+// Reverse geocoding helper (calls API route directly)
+const reverseGeocodeHelper = async (lat: number, lng: number): Promise<string | null> => {
     try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=14`
-        );
+        const response = await fetch(`/api/geocoding/reverse?lat=${lat}&lng=${lng}`);
+        if (!response.ok) return null;
         const data = await response.json();
-        const address = data.address;
-        return address?.city || address?.town || address?.village ||
-            address?.municipality || address?.county || null;
+        return data.location || null;
     } catch {
         return null;
     }
@@ -102,7 +104,7 @@ const extractMetadata = async (file: File): Promise<MediaFile['metadata']> => {
                 if (exif.latitude && exif.longitude) {
                     metadata.lat = exif.latitude;
                     metadata.lng = exif.longitude;
-                    metadata.location = await reverseGeocode(exif.latitude, exif.longitude);
+                    metadata.location = await reverseGeocodeHelper(exif.latitude, exif.longitude);
                 }
             }
         }
@@ -129,6 +131,11 @@ export default function JournalForm({
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // React Query hooks
+    const createJournalEntry = useCreateJournalEntry();
+    const uploadMediaMutation = useMediaUpload();
+    const transcribeMutation = useTranscription();
 
     // Form state
     const [date, setDate] = useState<Date>(new Date());
@@ -274,17 +281,10 @@ export default function JournalForm({
 
                 setAudioTranscribing(true);
                 try {
-                    const formData = new FormData();
-                    formData.append('audio', audioBlob);
-
-                    const response = await fetch('/api/transcribe', {
-                        method: 'POST',
-                        body: formData,
-                    });
-
-                    const result = await response.json();
-                    if (result.success && result.text) {
-                        setContent((prev) => prev ? `${prev}\n\n${result.text}` : result.text);
+                    const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
+                    const text = await transcribeMutation.mutateAsync(audioFile);
+                    if (text) {
+                        setContent((prev) => prev ? `${prev}\n\n${text}` : text);
                     }
                 } catch (error) {
                     console.error('Transcription error:', error);
@@ -307,9 +307,8 @@ export default function JournalForm({
         }
     };
 
-    // Upload media to Supabase
+    // Upload media using hook
     const uploadMedia = async (journalEntryId: string): Promise<string[]> => {
-        const supabase = getSupabaseClient();
         const ids: string[] = [];
 
         for (const media of mediaFiles) {
@@ -320,39 +319,13 @@ export default function JournalForm({
             );
 
             try {
-                const ext = media.file.name.split('.').pop()?.toLowerCase() || 'jpg';
-                const filename = `${tripId}/${media.type}s/${Date.now()}_${generateId()}.${ext}`;
+                const result = await uploadMediaMutation.mutateAsync({
+                    file: media.file,
+                    tripId,
+                    journalEntryId,
+                });
 
-                const { data, error } = await supabase.storage
-                    .from('media')
-                    .upload(filename, media.file);
-
-                if (error) throw error;
-
-                setMediaFiles((prev) =>
-                    prev.map((f) => f.id === media.id ? { ...f, progress: 60 } : f)
-                );
-
-                const { data: urlData } = supabase.storage.from('media').getPublicUrl(data.path);
-
-                const { data: asset, error: assetError } = await supabase
-                    .from('media_assets')
-                    .insert({
-                        trip_id: tripId,
-                        journal_entry_id: journalEntryId,
-                        media_type: media.type,
-                        url: urlData.publicUrl,
-                        taken_at: media.metadata?.takenAt?.toISOString() || null,
-                        lat: media.metadata?.lat || null,
-                        lng: media.metadata?.lng || null,
-                        file_size_bytes: media.file.size,
-                    })
-                    .select()
-                    .single();
-
-                if (assetError) throw assetError;
-
-                ids.push(asset.id);
+                ids.push(result.id);
 
                 setMediaFiles((prev) =>
                     prev.map((f) => f.id === media.id ? { ...f, status: 'completed', progress: 100 } : f)
@@ -378,25 +351,17 @@ export default function JournalForm({
         setErrors([]);
 
         try {
-            const supabase = getSupabaseClient();
-
-            const { data: entry, error: entryError } = await supabase
-                .from('journal_entries')
-                .insert({
-                    trip_id: tripId,
-                    entry_date: date.toISOString().split('T')[0],
-                    location: location || null,
-                    lat: lat || null,
-                    lng: lng || null,
-                    mood: mood || null,
-                    content: content.trim(),
-                    content_source: 'typed',
-                    tags: tags || null,
-                })
-                .select()
-                .single();
-
-            if (entryError) throw entryError;
+            const entry = await createJournalEntry.mutateAsync({
+                trip_id: tripId,
+                entry_date: date.toISOString().split('T')[0],
+                location: location || undefined,
+                lat: lat || undefined,
+                lng: lng || undefined,
+                mood: mood || undefined,
+                content: content.trim(),
+                content_source: 'typed',
+                tags: tags || undefined,
+            });
 
             let mediaIds: string[] = [];
             if (mediaFiles.filter((f) => f.status === 'pending').length > 0) {

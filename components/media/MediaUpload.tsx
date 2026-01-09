@@ -32,9 +32,8 @@ import {
 } from '@/lib/utils/constants';
 import { validateImageFile, validateVideoFile, isImageFile, isVideoFile } from '@/lib/utils/validators';
 import { formatFileSize } from '@/lib/utils/formatters';
-import { uploadFile, getPublicUrl, STORAGE_BUCKETS } from '@/lib/supabase/client';
-import { generateMediaFilename } from '@/lib/utils/exif';
 import type { UploadProgress } from '@/types';
+import { useMediaUpload } from '@/lib/hooks';
 
 interface MediaUploadProps {
     open: boolean;
@@ -51,6 +50,7 @@ export default function MediaUpload({
     journalEntryId,
     onUploadComplete,
 }: MediaUploadProps) {
+    const uploadMedia = useMediaUpload();
     const [files, setFiles] = useState<UploadProgress[]>([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -111,44 +111,17 @@ export default function MediaUpload({
             );
 
             try {
-                const mediaType = isImageFile(fileProgress.file) ? 'photo' : 'video';
-                const filename = generateMediaFilename(fileProgress.file.name, tripId, mediaType);
-
-                // Upload to storage
-                const { path, error: uploadError } = await uploadFile(
-                    STORAGE_BUCKETS.MEDIA,
-                    filename,
-                    fileProgress.file
-                );
-
-                if (uploadError) throw uploadError;
-
-                setFiles((prev) =>
-                    prev.map((f, idx) => (idx === i ? { ...f, progress: 50 } : f))
-                );
-
-                // Get public URL
-                const url = getPublicUrl(STORAGE_BUCKETS.MEDIA, path);
-
-                // Extract metadata and create media record
-                const response = await fetch('/api/media/extract-metadata', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fileUrl: url,
-                        mediaType,
-                        tripId,
-                        journalEntryId,
-                        filename: path,
-                    }),
+                // Upload via hook (handles storage upload + metadata extraction)
+                const result = await uploadMedia.mutateAsync({
+                    file: fileProgress.file,
+                    tripId,
+                    journalEntryId,
                 });
-
-                const result = await response.json();
 
                 setFiles((prev) =>
                     prev.map((f, idx) =>
                         idx === i
-                            ? { ...f, status: 'completed', progress: 100, result: result.data }
+                            ? { ...f, status: 'completed', progress: 100, result }
                             : f
                     )
                 );

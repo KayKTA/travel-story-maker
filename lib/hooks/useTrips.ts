@@ -1,136 +1,78 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { getSupabaseClient } from '@/lib/supabase/client';
-import type { TripWithStats, TripFormData } from '@/types';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api/client';
+import { queryKeys } from './queryKeys';
+import type { TripWithStats, TripFormData, Trip } from '@/types';
 
-interface UseTripsReturn {
-    trips: TripWithStats[];
-    loading: boolean;
-    error: string | null;
-    refresh: () => Promise<void>;
-    createTrip: (data: TripFormData) => Promise<void>;
+// API functions
+async function fetchTripsWithStats(
+    filters?: Record<string, string>
+): Promise<TripWithStats[]> {
+    const params = new URLSearchParams(filters);
+    return apiClient<TripWithStats[]>(`/api/trips/stats?${params}`);
 }
 
-/**
- * Hook for fetching and managing trips list with stats
- */
-export function useTrips(): UseTripsReturn {
-    const [trips, setTrips] = useState<TripWithStats[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+async function createTripAPI(data: TripFormData): Promise<Trip> {
+    return apiClient<Trip>('/api/trips', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
 
-    const fetchTrips = useCallback(async () => {
-        setLoading(true);
-        setError(null);
+async function updateTripAPI(id: string, data: Partial<TripFormData>): Promise<Trip> {
+    return apiClient<Trip>('/api/trips', {
+        method: 'PUT',
+        body: JSON.stringify({ id, ...data }),
+    });
+}
 
-        try {
-            const supabase = getSupabaseClient();
+async function deleteTripAPI(id: string): Promise<void> {
+    return apiClient<void>(`/api/trips?id=${id}`, {
+        method: 'DELETE',
+    });
+}
 
-            const { data: tripsData, error: tripsError } = await supabase
-                .from('trips')
-                .select('*')
-                .order('start_date', { ascending: false });
+// Query hooks
+export function useTrips(filters?: Record<string, string>) {
+    return useQuery({
+        queryKey: queryKeys.trips.list(filters || {}),
+        queryFn: () => fetchTripsWithStats(filters),
+    });
+}
 
-            if (tripsError) throw tripsError;
+// Mutation hooks
+export function useCreateTrip() {
+    const queryClient = useQueryClient();
 
-            // Fetch stats for each trip in parallel
-            const tripsWithStats = await Promise.all(
-                (tripsData || []).map(async (trip) => {
-                    const [journalResult, mediaResult, expensesResult, storiesResult] =
-                        await Promise.all([
-                            supabase
-                                .from('journal_entries')
-                                .select('*', { count: 'exact', head: true })
-                                .eq('trip_id', trip.id),
-                            supabase
-                                .from('media_assets')
-                                .select('media_type')
-                                .eq('trip_id', trip.id),
-                            supabase.from('expenses').select('amount').eq('trip_id', trip.id),
-                            supabase
-                                .from('stories')
-                                .select('*', { count: 'exact', head: true })
-                                .eq('trip_id', trip.id),
-                        ]);
-
-                    const mediaData = mediaResult.data || [];
-                    const expensesData = expensesResult.data || [];
-
-                    const photosCount = mediaData.filter(
-                        (m) => m.media_type === 'photo'
-                    ).length;
-                    const videosCount = mediaData.filter(
-                        (m) => m.media_type === 'video'
-                    ).length;
-                    const totalExpenses = expensesData.reduce(
-                        (sum, e) => sum + (e.amount || 0),
-                        0
-                    );
-
-                    // Calculate duration
-                    const startDate = new Date(trip.start_date);
-                    const endDate = trip.end_date ? new Date(trip.end_date) : new Date();
-                    const durationDays =
-                        Math.ceil(
-                            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-                        ) + 1;
-
-                    return {
-                        ...trip,
-                        journal_entries_count: journalResult.count || 0,
-                        media_count: mediaData.length,
-                        photos_count: photosCount,
-                        videos_count: videosCount,
-                        total_expenses: totalExpenses,
-                        expenses_count: expensesData.length,
-                        stories_count: storiesResult.count || 0,
-                        duration_days: durationDays,
-                    } as TripWithStats;
-                })
-            );
-
-            setTrips(tripsWithStats);
-        } catch (err) {
-            console.error('Error fetching trips:', err);
-            setError('Erreur lors du chargement des voyages');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const createTrip = useCallback(
-        async (data: TripFormData) => {
-            const supabase = getSupabaseClient();
-
-            const { error } = await supabase.from('trips').insert({
-                country: data.country,
-                city: data.city || null,
-                start_date: data.start_date,
-                end_date: data.end_date || null,
-                mood: data.mood || null,
-                lat: data.lat || null,
-                lng: data.lng || null,
-                cover_image_url: data.cover_image_url || null,
-                description: data.description || null,
-            });
-
-            if (error) throw error;
-
-            await fetchTrips();
+    return useMutation({
+        mutationFn: createTripAPI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.trips.all });
         },
-        [fetchTrips]
-    );
+    });
+}
 
-    useEffect(() => {
-        fetchTrips();
-    }, [fetchTrips]);
+export function useUpdateTrip() {
+    const queryClient = useQueryClient();
 
-    return {
-        trips,
-        loading,
-        error,
-        refresh: fetchTrips,
-        createTrip,
-    };
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<TripFormData> }) =>
+            updateTripAPI(id, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.trips.detail(variables.id) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.trips.lists() });
+        },
+    });
+}
+
+export function useDeleteTrip() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteTripAPI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.trips.all });
+        },
+    });
 }

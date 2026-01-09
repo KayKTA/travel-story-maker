@@ -1,112 +1,57 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { apiClient } from '@/lib/api/client';
 import type {
     Trip,
     JournalEntryWithMedia,
     MediaAsset,
     Expense,
     Story,
-    TripWithStats,
     TripStats,
 } from '@/types';
 
-// interface TripStats {
-//     journalCount: number;
-//     photosCount: number;
-//     videosCount: number;
-//     totalExpenses: number;
-//     storiesCount: number;
-//     entriesWithGps: number;
-// }
-
-interface UseTripDataReturn {
-    trip: Trip | null;
+interface TripDataResponse {
+    trip: Trip;
     entries: JournalEntryWithMedia[];
     media: MediaAsset[];
     expenses: Expense[];
-    stories: Story[];
-    loading: boolean;
-    error: string | null;
-    stats: TripStats;
-    refresh: () => Promise<void>;
-    tripName: string;
+    stories?: Story[];
+}
+
+// API function
+async function fetchTripData(tripId: string): Promise<TripDataResponse> {
+    return apiClient<TripDataResponse>(
+        `/api/trips/${tripId}?include=entries,media,expenses,stories`
+    );
 }
 
 /**
  * Hook for fetching all trip-related data
  */
-export function useTripData(tripId: string): UseTripDataReturn {
-    const [trip, setTrip] = useState<Trip | null>(null);
-    const [entries, setEntries] = useState<JournalEntryWithMedia[]>([]);
-    const [media, setMedia] = useState<MediaAsset[]>([]);
-    const [expenses, setExpenses] = useState<Expense[]>([]);
-    const [stories, setStories] = useState<Story[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export function useTripData(tripId: string) {
+    const query = useQuery({
+        queryKey: ['trip-data', tripId],
+        queryFn: () => fetchTripData(tripId),
+        enabled: !!tripId,
+    });
 
-    const fetchData = useCallback(async () => {
-        if (!tripId) return;
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            const supabase = getSupabaseClient();
-
-            // Fetch all data in parallel
-            const [tripResult, entriesResult, mediaResult, expensesResult] =
-                await Promise.all([
-                    supabase.from('trips').select('*').eq('id', tripId).single(),
-                    supabase
-                        .from('journal_entries')
-                        .select('*, media_assets(*)')
-                        .eq('trip_id', tripId)
-                        .order('entry_date', { ascending: true }),
-                    supabase
-                        .from('media_assets')
-                        .select('*')
-                        .eq('trip_id', tripId)
-                        .order('created_at', { ascending: false }),
-                    supabase
-                        .from('expenses')
-                        .select('*')
-                        .eq('trip_id', tripId)
-                        .order('expense_date', { ascending: false }),
-                    // supabase
-                    //     .from('stories')
-                    //     .select('*')
-                    //     .eq('trip_id', tripId)
-                    //     .order('created_at', { ascending: false }),
-                ]);
-
-            if (tripResult.error) throw tripResult.error;
-
-            setTrip(tripResult.data);
-            setEntries(entriesResult.data || []);
-            setMedia(mediaResult.data || []);
-            setExpenses(
-                (expensesResult.data || []).map((e) => ({
-                    ...e,
-                    date: e.expense_date,
-                }))
-            );
-            // setStories(storiesResult.data || []);
-        } catch (err) {
-            console.error('Error fetching trip data:', err);
-            setError('Erreur lors du chargement des données');
-        } finally {
-            setLoading(false);
+    // Compute stats from the data
+    const stats: TripStats = useMemo(() => {
+        if (!query.data) {
+            return {
+                journalCount: 0,
+                photosCount: 0,
+                videosCount: 0,
+                totalExpenses: 0,
+                storiesCount: 0,
+                entriesWithGps: 0,
+            };
         }
-    }, [tripId]);
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        const { entries, media, expenses, stories } = query.data;
 
-    // Computed stats
-    const stats = useMemo<TripStats>(() => {
         const photosCount = media.filter((m) => m.media_type === 'photo').length;
         const videosCount = media.filter((m) => m.media_type === 'video').length;
         const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -117,27 +62,28 @@ export function useTripData(tripId: string): UseTripDataReturn {
             photosCount,
             videosCount,
             totalExpenses,
-            storiesCount: stories.length,
+            storiesCount: stories?.length || 0,
             entriesWithGps,
         };
-    }, [entries, media, expenses, stories]);
+    }, [query.data]);
 
-    // Formatted trip name
+    // Compute trip name
     const tripName = useMemo(() => {
-        if (!trip) return '';
+        if (!query.data?.trip) return '';
+        const trip = query.data.trip;
         return trip.city ? `${trip.country} - ${trip.city}` : trip.country;
-    }, [trip]);
+    }, [query.data]);
 
     return {
-        trip,
-        entries,
-        media,
-        expenses,
-        stories,
-        loading,
-        error,
+        trip: query.data?.trip || null,
+        entries: query.data?.entries || [],
+        media: query.data?.media || [],
+        expenses: query.data?.expenses || [],
+        stories: query.data?.stories || [],
+        loading: query.isLoading,
+        error: query.error ? 'Erreur lors du chargement des données' : null,
         stats,
-        refresh: fetchData,
+        refresh: query.refetch,
         tripName,
     };
 }

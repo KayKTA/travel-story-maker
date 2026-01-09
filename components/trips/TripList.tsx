@@ -5,7 +5,7 @@ import { Luggage as LuggageIcon } from '@mui/icons-material';
 import TripCard from './TripCard';
 import TripForm from './TripForm';
 import { EmptyState } from '@/components/common';
-import { useDisclosure, useTrips } from '@/lib/hooks';
+import { useDisclosure, useCreateTrip } from '@/lib/hooks';
 import { tokens } from '@/styles';
 import type { TripWithStats, TripFormData } from '@/types';
 
@@ -16,10 +16,10 @@ interface TripListProps {
 
 export default function TripList({ trips, onRefresh }: TripListProps) {
     const formModal = useDisclosure();
-    const { createTrip } = useTrips();
+    const createTrip = useCreateTrip();
 
     const handleSubmit = async (data: TripFormData) => {
-        await createTrip(data);
+        await createTrip.mutateAsync(data);
         onRefresh?.();
     };
 

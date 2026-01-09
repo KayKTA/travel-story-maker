@@ -15,9 +15,10 @@ import {
 import { Add as AddIcon, FlightTakeoff as FlightIcon } from '@mui/icons-material';
 import TripList from './TripList';
 import TripForm from './TripForm';
-import { useTrips, useDisclosure } from '@/lib/hooks';
+import { useTrips, useCreateTrip, useDisclosure } from '@/lib/hooks';
 import { tokens } from '@/styles';
 import Brand from '../common/Brand';
+import type { TripFormData } from '@/types';
 
 // Loading skeleton component
 function TripsLoadingSkeleton() {
@@ -41,7 +42,8 @@ export default function TripsPageClient() {
     const searchParams = useSearchParams();
 
     // Data fetching
-    const { trips, loading, createTrip, refresh } = useTrips();
+    const { data: trips = [], isLoading: loading, refetch: refresh } = useTrips();
+    const createTrip = useCreateTrip();
 
     // Form modal state
     const formModal = useDisclosure();
@@ -66,8 +68,8 @@ export default function TripsPageClient() {
     };
 
     // Handle form submit
-    const handleSubmit = async (data: Parameters<typeof createTrip>[0]) => {
-        await createTrip(data);
+    const handleSubmit = async (data: TripFormData) => {
+        await createTrip.mutateAsync(data);
     };
 
     // Petites stats pour le header

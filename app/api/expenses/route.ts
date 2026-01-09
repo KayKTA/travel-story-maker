@@ -1,37 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import type { JournalEntryFormData } from '@/types';
+import type { ExpenseFormData } from '@/types/expense';
 
-// GET /api/journal - Liste les entrées de journal
+// GET /api/expenses - Liste toutes les dépenses
 export async function GET(request: NextRequest) {
     try {
         const supabase = await createClient();
         const { searchParams } = new URL(request.url);
 
         const tripId = searchParams.get('trip_id');
-        const mood = searchParams.get('mood');
+        const category = searchParams.get('category');
         const dateFrom = searchParams.get('date_from');
         const dateTo = searchParams.get('date_to');
 
         let query = supabase
-            .from('journal_entries')
-            .select('*, trips:trip_id(id, country, city), media_assets(*)')
-            .order('entry_date', { ascending: false });
+            .from('expenses')
+            .select('*')
+            .order('expense_date', { ascending: false });
 
         if (tripId) {
             query = query.eq('trip_id', tripId);
         }
 
-        if (mood) {
-            query = query.eq('mood', mood);
+        if (category) {
+            query = query.eq('category', category);
         }
 
         if (dateFrom) {
-            query = query.gte('entry_date', dateFrom);
+            query = query.gte('expense_date', dateFrom);
         }
 
         if (dateTo) {
-            query = query.lte('entry_date', dateTo);
+            query = query.lte('expense_date', dateTo);
         }
 
         const { data, error } = await query;
@@ -52,24 +52,23 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST /api/journal - Crée une nouvelle entrée
+// POST /api/expenses - Crée une nouvelle dépense
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient();
-        const body: JournalEntryFormData = await request.json();
+        const body: ExpenseFormData = await request.json();
 
         const { data, error } = await supabase
-            .from('journal_entries')
+            .from('expenses')
             .insert({
                 trip_id: body.trip_id,
-                entry_date: body.entry_date,
-                location: body.location || null,
-                lat: body.lat || null,
-                lng: body.lng || null,
-                mood: body.mood || null,
-                content: body.content,
-                content_source: body.content_source || 'typed',
-                tags: body.tags || null,
+                expense_date: body.date,
+                amount: body.amount,
+                currency: body.currency || 'EUR',
+                category: body.category,
+                label: body.label || null,
+                receipt_image_url: body.receipt_image_url || null,
+                notes: body.notes || null,
             })
             .select()
             .single();
@@ -90,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// PUT /api/journal - Met à jour une entrée
+// PUT /api/expenses - Met à jour une dépense
 export async function PUT(request: NextRequest) {
     try {
         const supabase = await createClient();
@@ -105,7 +104,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const { data, error } = await supabase
-            .from('journal_entries')
+            .from('expenses')
             .update(updateData)
             .eq('id', id)
             .select()
@@ -127,7 +126,7 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-// DELETE /api/journal - Supprime une entrée
+// DELETE /api/expenses - Supprime une dépense
 export async function DELETE(request: NextRequest) {
     try {
         const supabase = await createClient();
@@ -142,7 +141,7 @@ export async function DELETE(request: NextRequest) {
         }
 
         const { error } = await supabase
-            .from('journal_entries')
+            .from('expenses')
             .delete()
             .eq('id', id);
 
